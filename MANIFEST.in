@@ -1,0 +1,2 @@
+include versioneer.py
+include bask/_version.py

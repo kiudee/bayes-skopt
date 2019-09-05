@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.spatial.distance import cdist, euclidean
+from scipy.stats import halfnorm, invgamma
 
 
 def geometric_median(X, eps=1e-5):
@@ -47,3 +48,10 @@ def geometric_median(X, eps=1e-5):
             return y1
 
         y = y1
+
+
+def guess_priors(n_parameters):
+    priors = [lambda x: halfnorm(scale=2.0).logpdf(np.sqrt(np.exp(x))) + x / 2.0 - np.log(2.0)]
+    priors.extend([lambda x: invgamma(a=8.92, scale=1.73).logpdf(np.exp(x)) + x for _ in range(n_parameters)])
+    priors.append(lambda x: halfnorm(scale=1.0).logpdf(np.sqrt(np.exp(x))) + x / 2.0 - np.log(2.0))
+    return priors

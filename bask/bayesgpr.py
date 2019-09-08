@@ -24,7 +24,8 @@ class BayesGPR(GaussianProcessRegressor):
     ):
         super().__init__(kernel, alpha, optimizer, n_restarts_optimizer, normalize_y, copy_X_train, random_state, noise)
         self._sampler = None
-        self.chain = None
+        self.chain_ = None
+        self.pos_ = None
 
     @property
     def theta(self):
@@ -68,21 +69,18 @@ class BayesGPR(GaussianProcessRegressor):
             self.kernel_.theta = current_theta
             self.K_inv_ = current_K_inv
 
-    def fit(
+    def sample(
         self,
-        X,
-        y,
         n_threads=1,
         n_desired_samples=100,
-        n_burnin=10,
+        n_burnin=0,
         n_walkers_per_thread=100,
-        progress=True,
+        progress=False,
         priors=None,
         position=None,
+        add=False,
         **kwargs
     ):
-        super().fit(X, y)
-
         def log_prob_fn(x, gp=self):
             lp = 0
             for prior, val in zip(priors, x):
@@ -98,6 +96,8 @@ class BayesGPR(GaussianProcessRegressor):
         pos = None
         if position is not None:
             pos = position
+        elif self.pos_ is not None:
+            pos = self.pos_
         # elif backup_file is not None:
         #     try:
         #         with open(backup_file, 'rb') as f:
@@ -115,11 +115,42 @@ class BayesGPR(GaussianProcessRegressor):
         # if backup_file is not None:
         #     with open(backup_file, "wb") as f:
         #         np.save(f, pos)
-        self.chain = self._sampler.chain[:, n_burnin:, :].reshape(-1, n_dim)
-        self.theta = geometric_median(self.chain)
+        chain = self._sampler.chain[:, n_burnin:, :].reshape(-1, n_dim)
+        if add and self.chain_ is not None:
+            self.chain_ = np.concatenate([self.chain_, chain])
+        else:
+            self.chain_ = chain
+        self.theta = geometric_median(self.chain_)
+        self.pos_ = pos
 
-    #def predict(self, X, return_std=False, return_cov=False, return_mean_grad=False, return_std_grad=False):
-    #    return super().predict(X, return_std, return_cov, return_mean_grad, return_std_grad)
+    def fit(
+        self,
+        X,
+        y,
+        n_threads=1,
+        n_desired_samples=100,
+        n_burnin=10,
+        n_walkers_per_thread=100,
+        progress=True,
+        priors=None,
+        position=None,
+        **kwargs
+    ):
+        super().fit(X, y)
+        self.sample(
+            n_threads=n_threads,
+            n_desired_samples=n_desired_samples,
+            n_burnin=n_burnin,
+            n_walkers_per_thread=n_walkers_per_thread,
+            progress=progress,
+            priors=priors,
+            position=position,
+            add=False,
+            **kwargs
+        )
+
+    def predict(self, X, return_std=False, return_cov=False, return_mean_grad=False, return_std_grad=False):
+        return super().predict(X, return_std, return_cov, return_mean_grad, return_std_grad)
 
     def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
         rng = check_random_state(random_state)

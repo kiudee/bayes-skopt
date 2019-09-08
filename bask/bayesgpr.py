@@ -122,22 +122,32 @@ class BayesGPR(GaussianProcessRegressor):
     #    return super().predict(X, return_std, return_cov, return_mean_grad, return_std_grad)
 
     def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
-        if sample_mean:
-            return super().sample_y(X, n_samples, random_state)
-        if noise:
-            cm = self.noise_set_to_zero()
-        else:
-            cm = nullcontext(self)
         rng = check_random_state(random_state)
-        ind = rng.choice(len(self.chain), size=n_samples, replace=True)
+        if sample_mean:
+            if noise:
+                cm = nullcontext(self)
+            else:
+                cm = self.noise_set_to_zero()
+            with cm:
+                samples = super().sample_y(X, n_samples=n_samples, random_state=rng)
+            return samples
+        ind = rng.choice(len(self.chain_), size=n_samples, replace=True)
         current_theta = self.theta
         current_K_inv = np.copy(self.K_inv_)
+        current_L = np.copy(self.L_)
+        current_alpha = np.copy(self.alpha_)
         result = np.empty((X.shape[0], n_samples))
         for i, j in enumerate(ind):
-            theta = self.chain[j]
+            theta = self.chain_[j]
             self.theta = theta
+            if noise:
+                cm = nullcontext(self)
+            else:
+                cm = self.noise_set_to_zero()
             with cm:
-                result[i] = super().sample_y(X, n_samples, random_state)
+                result[:, i] = super().sample_y(X, n_samples=1, random_state=rng).flatten()
         self.kernel_.theta = current_theta
         self.K_inv_ = current_K_inv
+        self.alpha_ = current_alpha
+        self.L_ = current_L
         return result

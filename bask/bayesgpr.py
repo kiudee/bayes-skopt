@@ -22,6 +22,10 @@ class BayesGPR(GaussianProcessRegressor):
         random_state=None,
         noise="gaussian",
     ):
+        if kernel is None:
+            self._kernel = None
+        else:
+            self._kernel = kernel.clone_with_theta(kernel.theta)
         super().__init__(kernel, alpha, optimizer, n_restarts_optimizer, normalize_y, copy_X_train, random_state, noise)
         self._sampler = None
         self.chain_ = None
@@ -136,6 +140,7 @@ class BayesGPR(GaussianProcessRegressor):
         position=None,
         **kwargs
     ):
+        self.kernel = self._kernel
         super().fit(X, y)
         self.sample(
             n_threads=n_threads,
@@ -148,9 +153,6 @@ class BayesGPR(GaussianProcessRegressor):
             add=False,
             **kwargs
         )
-
-    def predict(self, X, return_std=False, return_cov=False, return_mean_grad=False, return_std_grad=False):
-        return super().predict(X, return_std, return_cov, return_mean_grad, return_std_grad)
 
     def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
         rng = check_random_state(random_state)

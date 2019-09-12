@@ -1,0 +1,27 @@
+language: python
+python:
+  - "3.6"
+  - "3.7"
+
+cache:
+  directories:
+    - $HOME/miniconda
+
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install -y pandoc
+  - . ./scripts/install_miniconda.sh
+
+install:
+  - . ./scripts/create_testenv.sh
+  - conda install --yes sphinx ipython
+  - pip install -I git+https://github.com/Syntaf/travis-sphinx.git
+  - pip install coveralls nbsphinx sphinx_rtd_theme
+
+script:
+  - pytest -v --cov=bask
+  - travis-sphinx build -n --source=docs
+
+after_success:
+  - coveralls
+  - travis-sphinx deploy

@@ -16,7 +16,7 @@ then
 else
   conda create -n ${ENVNAME} --yes -q pip python=${PYTHON_VERSION}
 fi
-source activate ${ENVNAME}
+conda activate ${ENVNAME}
 
 conda install --yes numpy scipy joblib pytest pytest-cov coverage scikit-learn
 pip install sphinx sphinx-autobuild nbsphinx pandoc ipykernel bottleneck sphinx_rtd_theme notebook sphinxcontrib-bibtex

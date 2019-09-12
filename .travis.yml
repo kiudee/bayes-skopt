@@ -19,7 +19,7 @@ install:
   - pip install coveralls nbsphinx sphinx_rtd_theme
 
 script:
-  - pytest -v --cov=bask
+  - pytest -v --cov=bask --ignore=src
   - travis-sphinx build -n --source=docs
 
 after_success:

@@ -55,3 +55,57 @@ def guess_priors(n_parameters):
     priors.extend([lambda x: invgamma(a=8.92, scale=1.73).logpdf(np.exp(x)) + x for _ in range(n_parameters)])
     priors.append(lambda x: halfnorm(scale=1.0).logpdf(np.sqrt(np.exp(x))) + x / 2.0 - np.log(2.0))
     return priors
+
+
+def phi(d, n_iter=10):
+    if d == 1:
+        return 1.61803398874989484820458683436563
+    elif d == 2:
+        return 1.32471795724474602596090885447809
+    x = 2.0000
+    for i in range(n_iter):
+        x = pow(1 + x, 1 / (d + 1))
+    return x
+
+
+def r2_sequence(n, d, seed=0.5):
+    g = phi(d)
+    alpha = np.zeros(d)
+    for j in range(d):
+        alpha[j] = pow(1 / g, j + 1) % 1
+    z = np.zeros((n, d))
+
+    for i in range(n):
+        z[i] = (seed + alpha * (i + 1)) % 1
+    return z
+
+
+class _NoOpPBar(object):
+    """This class implements the progress bar interface but does nothing"""
+
+    def __init__(self):
+        pass
+
+    def __enter__(self, *args, **kwargs):
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        pass
+
+    def update(self, count):
+        pass
+
+
+def get_progress_bar(display, total):
+    """Get a progress bar interface with given properties
+    If the tqdm library is not installed, this will always return a "progress
+    bar" that does nothing.
+    Args:
+        display (bool or str): Should the bar actually show the progress? Or a
+                               string to indicate which tqdm bar to use.
+        total (int): The total size of the progress bar.
+    """
+    if display is True:
+        return tqdm.tqdm(total=total)
+    else:
+        return _NoOpPBar()

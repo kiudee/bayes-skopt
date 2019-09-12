@@ -30,6 +30,7 @@ class BayesGPR(GaussianProcessRegressor):
         self._sampler = None
         self.chain_ = None
         self.pos_ = None
+        self.kernel_ = None
 
     @property
     def theta(self):

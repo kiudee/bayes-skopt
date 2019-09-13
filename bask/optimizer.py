@@ -114,9 +114,9 @@ class Optimizer(object):
 
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
 
-    def run(self, func, n_iter=1):
+    def run(self, func, n_iter=1, n_samples=5, gp_burnin=10):
         for _ in range(n_iter):
             x = self.ask()
-            self.tell(x, func(x))
+            self.tell(x, func(x), n_samples=n_samples, gp_burnin=gp_burnin)
 
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])

@@ -10,6 +10,9 @@ from skopt.learning.gaussian_process.gpr import _param_for_white_kernel_in_Sum
 from .utils import geometric_median
 
 
+__all__ = ["BayesGPR"]
+
+
 class BayesGPR(GaussianProcessRegressor):
     def __init__(
         self,

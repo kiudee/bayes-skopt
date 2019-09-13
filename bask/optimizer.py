@@ -8,6 +8,8 @@ from .bayesgpr import BayesGPR
 from .utils import r2_sequence, guess_priors
 from bask.acquisition import evaluate_acquisitions
 
+__all__ = ["Optimizer"]
+
 ACQUISITION_FUNC = {
     "mes": acquisition.max_value_search,
     "ei": acquisition.expected_improvement,

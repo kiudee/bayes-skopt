@@ -3,6 +3,9 @@ from scipy.spatial.distance import cdist, euclidean
 from scipy.stats import halfnorm, invgamma
 
 
+__all__ = ["geometric_median", "r2_sequence", "guess_priors"]
+
+
 def geometric_median(X, eps=1e-5):
     """Compute the geometric median for the given array of points.
 

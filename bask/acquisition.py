@@ -6,6 +6,9 @@ from sklearn.utils import check_random_state
 from bask.utils import get_progress_bar
 
 
+__all__ = ["evaluate_acquisitions"]
+
+
 def evaluate_acquisitions(X, gpr, acquisition_functions=None, n_samples=10, progress=False,
                           random_state=None, **kwargs):
     n_cand_points = len(X)

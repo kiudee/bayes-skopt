@@ -56,7 +56,8 @@ class Optimizer(object):
         if gp_kwargs is None:
             gp_kwargs = dict()
         if gp_priors is None:
-            self.gp_priors = guess_priors(n_parameters=self.space.transformed_n_dims)
+            gp_priors = guess_priors(n_parameters=self.space.transformed_n_dims)
+        self.gp_priors = gp_priors
         self.gp = BayesGPR(kernel=gp_kernel, random_state=self.rng.randint(0, np.iinfo(np.int32).max), **gp_kwargs)
 
         self.Xi = []
@@ -73,7 +74,7 @@ class Optimizer(object):
                 raise RuntimeError("Initialization is finished, but no model has been fit.")
             return self._next_x
 
-    def tell(self, x, y, fit=True, n_samples=5):
+    def tell(self, x, y, fit=True, n_samples=5, gp_samples=100, gp_burnin=10, progress=False):
         # if y isn't a scalar it means we have been handed a batch of points
         if is_listlike(y) and is_2Dlistlike(x):
             self.Xi.extend(x)
@@ -89,7 +90,14 @@ class Optimizer(object):
         if fit and self._n_initial_points <= 0:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                self.gp.fit(self.space.transform(self.Xi), self.yi)
+                self.gp.fit(
+                    self.space.transform(self.Xi),
+                    self.yi,
+                    priors=self.gp_priors,
+                    n_desired_samples=gp_samples,
+                    n_burnin=gp_burnin,
+                    progress=progress,
+                )
 
             X = self.space.transform(self.space.rvs(n_samples=self.n_points, random_state=self.rng))
             acq_values = evaluate_acquisitions(

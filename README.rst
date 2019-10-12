@@ -1,3 +1,5 @@
+|Build Status| |Coverage|
+
 Bayes-skopt
 ===========
 Bayes-skopt (short ``bask``) is a library designed to optimize very costly and noisy black-box functions.
@@ -31,3 +33,8 @@ Another option is to clone the repository and install Bayes-skopt using::
 License
 --------
 `Apache License, Version 2.0 <https://github.com/kiudee/cs-ranking/blob/master/LICENSE>`_
+
+.. |Build Status| image:: https://travis-ci.org/kiudee/bayes-skopt.svg?branch=master
+   :target: https://travis-ci.org/kiudee/bayes-skopt
+.. |Coverage| image:: https://coveralls.io/repos/github/kiudee/bayes-skopt/badge.svg?branch=master
+   :target: https://coveralls.io/github/kiudee/bayes-skopt?branch=master

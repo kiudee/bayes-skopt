@@ -191,6 +191,8 @@ class BayesGPR(GaussianProcessRegressor):
 
     def sample(
         self,
+        X=None,
+        y=None,
         n_threads=1,
         n_desired_samples=100,
         n_burnin=0,
@@ -209,6 +211,16 @@ class BayesGPR(GaussianProcessRegressor):
             if not np.isfinite(lp):
                 return -np.inf
             return lp
+
+        # Update data, if available:
+        if X is not None:
+            if self.normalize_y:
+                self._y_train_mean = np.mean(y, axis=0)
+                y = y - self._y_train_mean
+            else:
+                self._y_train_mean = np.zeros(1)
+            self.X_train_ = np.copy(X) if self.copy_X_train else X
+            self.y_train_ = np.copy(y) if self.copy_X_train else y
 
         n_dim = len(self.theta)
         n_walkers = n_threads * n_walkers_per_thread

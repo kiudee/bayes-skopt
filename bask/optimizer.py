@@ -90,14 +90,24 @@ class Optimizer(object):
         if fit and self._n_initial_points <= 0:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                self.gp.fit(
-                    self.space.transform(self.Xi),
-                    self.yi,
-                    priors=self.gp_priors,
-                    n_desired_samples=gp_samples,
-                    n_burnin=gp_burnin,
-                    progress=progress,
-                )
+                if self.gp.pos_ is None:
+                    self.gp.fit(
+                        self.space.transform(self.Xi),
+                        self.yi,
+                        priors=self.gp_priors,
+                        n_desired_samples=gp_samples,
+                        n_burnin=gp_burnin,
+                        progress=progress,
+                    )
+                else:
+                    self.gp.sample(
+                        self.space.transform(self.Xi),
+                        self.yi,
+                        priors=self.gp_priors,
+                        n_desired_samples=gp_samples,
+                        n_burnin=gp_burnin,
+                        progress=progress
+                    )
 
             X = self.space.transform(self.space.rvs(n_samples=self.n_points, random_state=self.rng))
             acq_values = evaluate_acquisitions(

@@ -11,11 +11,12 @@ from bask.acquisition import evaluate_acquisitions
 __all__ = ["Optimizer"]
 
 ACQUISITION_FUNC = {
-    "mes": acquisition.max_value_search,
-    "ei": acquisition.expected_improvement,
-    "ttei": acquisition.top_two_ei,
-    "mean": acquisition.expectation,
-    "lcb": acquisition.lcb,
+    "mes": acquisition.MaxValueSearch(),
+    "ei": acquisition.ExpectedImprovement(),
+    "ttei": acquisition.TopTwoEI(),
+    "mean": acquisition.Expectation(),
+    "lcb": acquisition.LCB(),
+    "ts": acquisition.ThompsonSampling()
 }
 
 

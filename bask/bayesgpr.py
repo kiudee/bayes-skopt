@@ -1,5 +1,6 @@
 import emcee as mc
 import numpy as np
+from collections.abc import Iterable
 from contextlib import contextmanager, nullcontext
 from scipy.linalg import cholesky, cho_solve, solve_triangular
 from sklearn.utils import check_random_state
@@ -205,8 +206,11 @@ class BayesGPR(GaussianProcessRegressor):
     ):
         def log_prob_fn(x, gp=self):
             lp = 0
-            for prior, val in zip(priors, x):
-                lp += prior(val)
+            if isinstance(priors, Iterable):
+                for prior, val in zip(priors, x):
+                    lp += prior(val)
+            else:  # Assume priors is a callable, which evaluates the log probability:
+                lp += priors(x)
             lp = lp + gp.log_marginal_likelihood(theta=x)
             if not np.isfinite(lp):
                 return -np.inf

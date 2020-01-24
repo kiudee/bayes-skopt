@@ -75,8 +75,11 @@ class Optimizer(object):
                 raise RuntimeError("Initialization is finished, but no model has been fit.")
             return self._next_x
 
-    def tell(self, x, y, fit=True, n_samples=5, gp_samples=100, gp_burnin=10, progress=False):
+    def tell(self, x, y, fit=True, replace=False, n_samples=5, gp_samples=100, gp_burnin=10, progress=False):
         # if y isn't a scalar it means we have been handed a batch of points
+        if replace:
+            self.Xi = []
+            self.yi = []
         if is_listlike(y) and is_2Dlistlike(x):
             self.Xi.extend(x)
             self.yi.extend(y)
@@ -91,7 +94,7 @@ class Optimizer(object):
         if fit and self._n_initial_points <= 0:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
-                if self.gp.pos_ is None:
+                if self.gp.pos_ is None or replace:
                     self.gp.fit(
                         self.space.transform(self.Xi),
                         self.yi,

@@ -24,7 +24,7 @@ A fully Bayesian implementation of sequential model-based optimization
 
 
 * Free software: Apache Software License 2.0
-* Documentation: https://bask.readthedocs.io.
+* Documentation: https://bayes-skopt.readthedocs.io.
 
 
 Features

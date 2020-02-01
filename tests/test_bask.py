@@ -6,7 +6,6 @@ import pytest
 
 from click.testing import CliRunner
 
-from bask import bask
 from bask import cli
 
 

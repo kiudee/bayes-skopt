@@ -1,16 +1,34 @@
-|Build Status| |Coverage|
-
+===========
 Bayes-skopt
 ===========
-Bayes-skopt (short ``bask``) is a library designed to optimize very costly and noisy black-box functions.
-We extend Scikit-Optimize by doing the inference of the hyperparameters in a fully Bayesian framework.
-Other than the typical maximum marginal likelihood estimation, suitable prior distribution can be employed to
-prevent identifiability/convergence issues.
 
-The library is built on top of Scikit-Optimize, Scikit-Learn, NumPy, SciPy and emcee.
+
+.. image:: https://img.shields.io/pypi/v/bask.svg
+        :target: https://pypi.python.org/pypi/bask
+
+.. image:: https://img.shields.io/travis/kiudee/bayes-skopt.svg
+        :target: https://travis-ci.org/kiudee/bayes-skopt
+
+.. image:: https://readthedocs.org/projects/bayes-skopt/badge/?version=latest
+        :target: https://bayes-skopt.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
+
+
+.. image:: https://pyup.io/repos/github/kiudee/bayes-skopt/shield.svg
+     :target: https://pyup.io/repos/github/kiudee/bayes-skopt/
+     :alt: Updates
+
+
+
+A fully Bayesian implementation of sequential model-based optimization
+
+
+* Free software: Apache Software License 2.0
+* Documentation: https://bayes-skopt.readthedocs.io.
+
 
 Features
-========
+--------
 
 - A **fully Bayesian** variant of the ``GaussianProcessRegressor``.
 - State of the art information-theoretic acquisition functions, such as the
@@ -18,9 +36,8 @@ Features
   convergence in simple regret.
 - Familiar `Optimizer` interface known from Scikit-Optimize.
 
-
 Installation
-============
+------------
 
 The latest development version of Bayes-skopt can be installed from Github as follows::
 
@@ -30,11 +47,10 @@ Another option is to clone the repository and install Bayes-skopt using::
 
    python setup.py install
 
-License
---------
-`Apache License, Version 2.0 <https://github.com/kiudee/cs-ranking/blob/master/LICENSE>`_
+Credits
+-------
 
-.. |Build Status| image:: https://travis-ci.org/kiudee/bayes-skopt.svg?branch=master
-   :target: https://travis-ci.org/kiudee/bayes-skopt
-.. |Coverage| image:: https://coveralls.io/repos/github/kiudee/bayes-skopt/badge.svg?branch=master
-   :target: https://coveralls.io/github/kiudee/bayes-skopt?branch=master
+This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+
+.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage

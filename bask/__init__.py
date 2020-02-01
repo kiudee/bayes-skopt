@@ -1,7 +1,8 @@
+"""Top-level package for Bayes-skopt."""
 
-from ._version import get_versions
-__version__ = get_versions()['version']
-del get_versions
+__author__ = """Karlson Pfannschmidt"""
+__email__ = 'kiudee@mail.upb.de'
+__version__ = '0.1.0'
 
 from .acquisition import *
 from .bayesgpr import *

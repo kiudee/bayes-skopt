@@ -1,26 +1,27 @@
+# Config file for automatic testing at travis-ci.org
+
 language: python
 python:
-  - "3.7"
+  - 3.8
+  - 3.7
 
-cache:
-  directories:
-    - $HOME/miniconda
+# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+install: pip install -U tox-travis
 
-before_install:
-  - sudo apt-get update
-  - sudo apt-get install -y pandoc
-  - . ./scripts/install_miniconda.sh
+# Command to run tests, e.g. python setup.py test
+script: tox
 
-install:
-  - . ./scripts/create_testenv.sh
-  - conda install --yes sphinx ipython
-  - pip install -I git+https://github.com/Syntaf/travis-sphinx.git
-  - pip install coveralls nbsphinx sphinx_rtd_theme
-
-script:
-  - pytest -v --cov=bask --ignore=src
-  - travis-sphinx build -n --source=docs
-
-after_success:
-  - coveralls
-  - travis-sphinx deploy
+# Assuming you have installed the travis-ci CLI tool, after you
+# create the Github repo and add it to Travis, run the
+# following command to finish PyPI deployment setup:
+# $ travis encrypt --add deploy.password
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: __token__
+  password:
+    secure: "tP75FQ9UswN6VMiYhI0PLC8rji1s7wRweIfaMlU+WA6brVExRgdJFGj3jiRmlfXyuuWFpOI+jVb3cf/X12x1UD2zYWuQMjEJD7sFfxx/wIu1qmisfDUka6UCQyF7LTIAtnJrzewvyHDgPcX86R7nsw/e8ZIs4qnA7rbKD1Bb7QxHtwgb5Mg1fIT59KtxU5nQeLQRZrjtGPvde3tFtOJ0lfp3HO2s8aFGEsbs16tNG0BMMMV428gmzhW7GP1wXRoFfj3zshoGaooeziHs+Fdyl+ve8YrbOgtAAyJOWXTmGFT3/luJV/Y4TBSWiGnqZzwMzDwXEl+xNYTa4UfDkP3b4cCovWMeu/LJlmACHk/aPDoZBADpXPMXCL6carN0OZ/MsCP6wAClUtuqWzMVPc6lSrypNhoW/mKvgON7tQ4xuBdGAzc+dmw6reenIiImGsmzImC3PMgJhlIQODEPkFKbmI9xRBAu5cpZv0eg4ODbXQtcLf9EYgiN9g6exU/ZEStYUSUcRFRDfSnKqkxWWPpMFmJQ53RT4GIb7qa33/l5ncykJUW6Cp3N/7SAZWB/HmqAgPbO8h3ixSog3+GSkxnKNsNbuHqo7l0FgnbhbHhZ/9STeW/oWhVSplCpSnNCzNWt+H5krtxF5M+3ZYbKCV/QrhqqP7XIMuFoy8edQ99xUvA="
+  on:
+    tags: true
+    repo: kiudee/bayes-skopt
+    python: 3.8

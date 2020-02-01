@@ -9,8 +9,8 @@ Bayes-skopt
 .. image:: https://img.shields.io/travis/kiudee/bayes-skopt.svg
         :target: https://travis-ci.org/kiudee/bayes-skopt
 
-.. image:: https://readthedocs.org/projects/bask/badge/?version=latest
-        :target: https://bask.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/bayes-skopt/badge/?version=latest
+        :target: https://bayes-skopt.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 

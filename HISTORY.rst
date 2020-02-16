@@ -2,7 +2,7 @@
 History
 =======
 
-0.1.1 (2020-02-16)
+0.1.2 (2020-02-16)
 ------------------
 
 * Fix the ``tell`` method of the optimizer not updating ``_n_initial_points`` correctly,

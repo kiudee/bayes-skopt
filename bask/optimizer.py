@@ -80,6 +80,7 @@ class Optimizer(object):
         if replace:
             self.Xi = []
             self.yi = []
+            self._n_initial_points = self.n_initial_points_
         if is_listlike(y) and is_2Dlistlike(x):
             self.Xi.extend(x)
             self.yi.extend(y)

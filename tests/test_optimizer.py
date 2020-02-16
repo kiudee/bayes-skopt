@@ -15,3 +15,16 @@ def test_multiple_asks():
     opt.ask()
     assert_equal(len(opt.Xi), 3)
     assert_equal(opt.ask(), opt.ask())
+
+
+def test_initial_points():
+    opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5)
+    x = opt.ask()
+    opt.tell([x], [0.])
+    assert opt._n_initial_points == opt.n_initial_points_ - 1
+
+    opt.tell([x], [0.])
+    assert opt._n_initial_points == opt.n_initial_points_ - 2
+
+    opt.tell([[0.1], [0.2], [0.3]], [0.0, 0.1, 0.2], replace=True)
+    assert opt._n_initial_points == opt.n_initial_points_ - 3

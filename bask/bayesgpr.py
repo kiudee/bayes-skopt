@@ -143,6 +143,7 @@ class BayesGPR(GaussianProcessRegressor):
         else:
             self._kernel = kernel.clone_with_theta(kernel.theta)
         super().__init__(kernel, alpha, optimizer, n_restarts_optimizer, normalize_y, copy_X_train, random_state, noise)
+        self._alpha = self.alpha
         self._sampler = None
         self.chain_ = None
         self.pos_ = None
@@ -159,6 +160,7 @@ class BayesGPR(GaussianProcessRegressor):
     def theta(self, theta):
         self.kernel_.theta = theta
         K = self.kernel_(self.X_train_)
+        K[np.diag_indices_from(K)] += self.alpha
         try:
             self.L_ = cholesky(K, lower=True)
             L_inv = solve_triangular(self.L_.T, np.eye(self.L_.shape[0]))
@@ -176,24 +178,29 @@ class BayesGPR(GaussianProcessRegressor):
     @contextmanager
     def noise_set_to_zero(self):
         current_theta = self.theta
-        # Saving the old kernel inverse in order to avoid recomputing it
-        current_K_inv = np.copy(self.K_inv_)
         try:
             # Now we set the noise to 0, but do NOT recalculate the alphas!:
             white_present, white_param = _param_for_white_kernel_in_Sum(self.kernel_)
             self.kernel_.set_params(**{white_param: WhiteKernel(noise_level=0.0)})
-            # Precompute arrays needed at prediction
-            L_inv = solve_triangular(self.L_.T, np.eye(self.L_.shape[0]))
-            self.K_inv_ = L_inv.dot(L_inv.T)
             yield self
         finally:
             self.kernel_.theta = current_theta
-            self.K_inv_ = current_K_inv
+
+    def _apply_noise_vector(self, n_instances, noise_vector):
+        # We apply the noise vector to self.alpha here, to avoid having to pull up inherited code:
+        if noise_vector is not None:
+            if not np.iterable(self.alpha):
+                alpha = np.ones(n_instances) * self.alpha
+            elif not np.iterable(self._alpha):  # we already changed self.alpha before
+                alpha = np.ones(n_instances) * self._alpha
+            alpha[:len(noise_vector)] += noise_vector
+            self.alpha = alpha
 
     def sample(
         self,
         X=None,
         y=None,
+        noise_vector=None,
         n_threads=1,
         n_desired_samples=100,
         n_burnin=0,
@@ -225,6 +232,8 @@ class BayesGPR(GaussianProcessRegressor):
                 self._y_train_mean = np.zeros(1)
             self.X_train_ = np.copy(X) if self.copy_X_train else X
             self.y_train_ = np.copy(y) if self.copy_X_train else y
+
+        self._apply_noise_vector(len(self.y_train_), noise_vector)
 
         n_dim = len(self.theta)
         n_walkers = n_threads * n_walkers_per_thread
@@ -263,6 +272,7 @@ class BayesGPR(GaussianProcessRegressor):
         self,
         X,
         y,
+        noise_vector=None,
         n_threads=1,
         n_desired_samples=100,
         n_burnin=10,
@@ -273,6 +283,7 @@ class BayesGPR(GaussianProcessRegressor):
         **kwargs
     ):
         self.kernel = self._kernel
+        self._apply_noise_vector(len(y), noise_vector)
         super().fit(X, y)
         self.sample(
             n_threads=n_threads,
@@ -316,3 +327,4 @@ class BayesGPR(GaussianProcessRegressor):
         self.alpha_ = current_alpha
         self.L_ = current_L
         return result
+

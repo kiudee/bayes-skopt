@@ -2,6 +2,12 @@
 History
 =======
 
+0.2.0 (2020-02-16)
+------------------
+
+* Allow user to pass a vector of noise variances to ``tell``, ``fit`` and ``sample``.
+  This can be used to warm start the optimization process.
+
 0.1.2 (2020-02-16)
 ------------------
 

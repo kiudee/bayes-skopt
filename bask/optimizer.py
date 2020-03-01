@@ -63,6 +63,7 @@ class Optimizer(object):
 
         self.Xi = []
         self.yi = []
+        self.noisei = []
         self._next_x = None
 
     def ask(self):
@@ -75,19 +76,35 @@ class Optimizer(object):
                 raise RuntimeError("Initialization is finished, but no model has been fit.")
             return self._next_x
 
-    def tell(self, x, y, fit=True, replace=False, n_samples=5, gp_samples=100, gp_burnin=10, progress=False):
+    def tell(self, x, y, noise_vector=None, fit=True, replace=False, n_samples=5, gp_samples=100, gp_burnin=10, progress=False):
         # if y isn't a scalar it means we have been handed a batch of points
+
+        # TODO (noise vector):
+        #  1. Replace case should be easy
+        #  2. Add case should add noise values to list
+        #  -> What if noise_vector is None? (have to set noise to 0)
         if replace:
             self.Xi = []
             self.yi = []
+            self.noisei = []
             self._n_initial_points = self.n_initial_points_
         if is_listlike(y) and is_2Dlistlike(x):
             self.Xi.extend(x)
             self.yi.extend(y)
+            if noise_vector is None:
+                noise_vector = [0.0] * len(y)
+            elif not is_listlike(noise_vector) or len(noise_vector) != len(y):
+                raise ValueError(f"Vector of noise variances needs to be of equal length as `y`.")
+            self.noisei.extend(noise_vector)
             self._n_initial_points -= len(y)
         elif is_listlike(x):
             self.Xi.append(x)
             self.yi.append(y)
+            if noise_vector is None:
+                noise_vector = 0.0
+            elif is_listlike(noise_vector):
+                raise ValueError(f"Vector of noise variances is a list, while tell only received one datapoint.")
+            self.noisei.append(noise_vector)
             self._n_initial_points -= 1
         else:
             raise ValueError(f"Type of arguments `x` ({type(x)}) and `y` ({type(y)}) " "not compatible.")
@@ -99,6 +116,7 @@ class Optimizer(object):
                     self.gp.fit(
                         self.space.transform(self.Xi),
                         self.yi,
+                        noise_vector=np.array(self.noisei),
                         priors=self.gp_priors,
                         n_desired_samples=gp_samples,
                         n_burnin=gp_burnin,
@@ -108,6 +126,7 @@ class Optimizer(object):
                     self.gp.sample(
                         self.space.transform(self.Xi),
                         self.yi,
+                        noise_vector=np.array(self.noisei),
                         priors=self.gp_priors,
                         n_desired_samples=gp_samples,
                         n_burnin=gp_burnin,

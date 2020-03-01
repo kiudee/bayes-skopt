@@ -25,6 +25,7 @@ A fully Bayesian implementation of sequential model-based optimization
 
 * Free software: Apache Software License 2.0
 * Documentation: https://bayes-skopt.readthedocs.io.
+* Built on top of the excellent `Scikit-Optimize (skopt) <https://github.com/scikit-optimize/scikit-optimize>`__.
 
 
 Features

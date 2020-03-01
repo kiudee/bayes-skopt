@@ -2,7 +2,7 @@
 History
 =======
 
-0.2.0 (2020-02-16)
+0.2.0 (2020-03-01)
 ------------------
 
 * Allow user to pass a vector of noise variances to ``tell``, ``fit`` and ``sample``.

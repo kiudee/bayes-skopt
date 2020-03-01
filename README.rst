@@ -40,6 +40,10 @@ Features
 Installation
 ------------
 
+To install the latest stable release it is best to install the version on PyPI::
+
+   pip install bask
+
 The latest development version of Bayes-skopt can be installed from Github as follows::
 
    pip install git+https://github.com/kiudee/bayes-skopt

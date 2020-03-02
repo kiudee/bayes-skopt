@@ -142,6 +142,7 @@ class BayesGPR(GaussianProcessRegressor):
             self._kernel = None
         else:
             self._kernel = kernel.clone_with_theta(kernel.theta)
+        random_state = check_random_state(random_state)
         super().__init__(kernel, alpha, optimizer, n_restarts_optimizer, normalize_y, copy_X_train, random_state, noise)
         self._alpha = self.alpha
         self._sampler = None
@@ -252,10 +253,12 @@ class BayesGPR(GaussianProcessRegressor):
         if pos is None:
             theta = self.theta
             theta[np.isinf(theta)] = np.log(self.noise_)
-            pos = [theta + 1e-2 * np.random.randn(n_dim) for _ in range(n_walkers)]
+            pos = [theta + 1e-2 * self.random_state.randn(n_dim) for _ in range(n_walkers)]
         self._sampler = mc.EnsembleSampler(
             nwalkers=n_walkers, ndim=n_dim, log_prob_fn=log_prob_fn, threads=n_threads, **kwargs
         )
+        rng = np.random.RandomState(self.random_state.randint(0, np.iinfo(np.int32).max))
+        self._sampler.random_state = rng.get_state()
         pos, prob, state = self._sampler.run_mcmc(pos, n_samples, progress=progress)
         # if backup_file is not None:
         #     with open(backup_file, "wb") as f:

@@ -33,7 +33,8 @@ Features
 
 - A **fully Bayesian** variant of the ``GaussianProcessRegressor``.
 - State of the art information-theoretic acquisition functions, such as the
-  `Max-value entropy search <https://arxiv.org/abs/1703.01968>`__, for even faster
+  `Max-value entropy search <https://arxiv.org/abs/1703.01968>`__ or
+  `Predictive variance reduction search <https://bayesopt.github.io/papers/2017/13.pdf>`__, for even faster
   convergence in simple regret.
 - Familiar `Optimizer` interface known from Scikit-Optimize.
 

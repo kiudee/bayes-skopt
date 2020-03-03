@@ -3,6 +3,9 @@ Bayes-skopt
 ===========
 
 
+.. image:: https://mybinder.org/badge_logo.svg
+        :target: https://mybinder.org/v2/gh/kiudee/bayes-skopt/master
+
 .. image:: https://img.shields.io/pypi/v/bask.svg
         :target: https://pypi.python.org/pypi/bask
 
@@ -13,12 +16,9 @@ Bayes-skopt
         :target: https://bayes-skopt.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-
 .. image:: https://pyup.io/repos/github/kiudee/bayes-skopt/shield.svg
-     :target: https://pyup.io/repos/github/kiudee/bayes-skopt/
-     :alt: Updates
-
-
+        :target: https://pyup.io/repos/github/kiudee/bayes-skopt/
+        :alt: Updates
 
 A fully Bayesian implementation of sequential model-based optimization
 

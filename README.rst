@@ -4,7 +4,7 @@ Bayes-skopt
 
 
 .. image:: https://mybinder.org/badge_logo.svg
-        :target: https://mybinder.org/v2/gh/kiudee/bayes-skopt/master
+        :target: https://mybinder.org/v2/gh/kiudee/bayes-skopt/master?filepath=examples
 
 .. image:: https://img.shields.io/pypi/v/bask.svg
         :target: https://pypi.python.org/pypi/bask

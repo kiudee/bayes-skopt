@@ -2,6 +2,9 @@
 Usage
 =====
 
-To use Bayes-skopt in a project::
+.. toctree::
+   :maxdepth: 1
+   :caption: Examples:
 
-    import bask
+   examples/Fit-GP
+   examples/Optimize-1D-function.ipynb

@@ -1,5 +1,5 @@
 Welcome to Bayes-skopt's documentation!
-======================================
+=======================================
 
 .. toctree::
    :maxdepth: 2

@@ -330,4 +330,3 @@ class BayesGPR(GaussianProcessRegressor):
         self.alpha_ = current_alpha
         self.L_ = current_L
         return result
-

@@ -5,7 +5,7 @@ from skopt.utils import create_result, normalize_dimensions, is_listlike, is_2Dl
 
 from . import acquisition
 from .bayesgpr import BayesGPR
-from .utils import r2_sequence, guess_priors
+from .utils import r2_sequence, guess_priors, construct_default_kernel
 from bask.acquisition import evaluate_acquisitions
 
 __all__ = ["Optimizer"]
@@ -58,17 +58,24 @@ class Optimizer(object):
         # TODO: Construct kernel if None
         if gp_kwargs is None:
             gp_kwargs = dict()
-        if gp_priors is None:
-            gp_priors = guess_priors(n_parameters=self.space.transformed_n_dims)
-        self.gp_priors = gp_priors
+        if gp_kernel is None:
+            gp_kernel = construct_default_kernel(dimensions)
+
         self.gp = BayesGPR(kernel=gp_kernel, random_state=self.rng.randint(0, np.iinfo(np.int32).max), **gp_kwargs)
+        # We are only able to guess priors now, since BayesGPR can add
+        # another WhiteKernel, when noise is set to "gaussian":
+        if gp_priors is None:
+            gp_priors = guess_priors(self.gp.kernel)
+        self.gp_priors = gp_priors
 
         self.Xi = []
         self.yi = []
         self.noisei = []
         self._next_x = None
 
-    def ask(self):
+    def ask(self, n_points=1):
+        if n_points > 1:
+            raise NotImplementedError("Returning multiple points is not implemented yet.")
         if self._n_initial_points > 0:  # TODO: Make sure estimator is trained here always
             if self.init_strategy == "r2":
                 return self._initial_points[self._n_initial_points - 1]

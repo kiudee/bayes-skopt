@@ -33,13 +33,23 @@ import bask
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
+    'numpydoc',
     'sphinx.ext.viewcode',
     'nbsphinx',
     'sphinx.ext.mathjax'
 ]
 
+autodoc_default_options = {
+    'members': True,
+    'inherited-members': True
+}
+
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ['templates']
+
+# generate autosummary even if no references
+autosummary_generate = True
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:

@@ -53,9 +53,7 @@ class BayesSearchCV(BayesSearchCVSK):
         ``n_points`` if you want to try more parameter settings in
         parallel.
     optimizer_kwargs : dict, optional
-        Dict of arguments passed to :class:`Optimizer`.  For example,
-        ``{'base_estimator': 'RF'}`` would use a Random Forest surrogate
-        instead of the default Gaussian Process.
+        Dict of arguments passed to :class:`Optimizer`.
     scoring : string, callable or None, default=None
         A string (see model evaluation documentation) or
         a scorer callable object / function with signature

@@ -4,7 +4,12 @@ from scipy.stats import halfnorm, invgamma
 from skopt.learning.gaussian_process.kernels import Matern, ConstantKernel
 
 
-__all__ = ["geometric_median", "r2_sequence", "guess_priors"]
+__all__ = [
+    "geometric_median",
+    "r2_sequence",
+    "guess_priors",
+    "construct_default_kernel",
+]
 
 
 def geometric_median(X, eps=1e-5):

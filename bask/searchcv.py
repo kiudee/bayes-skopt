@@ -344,7 +344,7 @@ class BayesSearchCV(BayesSearchCVSK):
         self.best_index_ = np.argmax(self.cv_results_["mean_test_score"])
 
         # feed the point and objective back into optimizer
-        local_results = self.cv_results_["mean_test_score"][-len(params) :]
+        local_results = self.cv_results_["mean_test_score"][-len(params):]
 
         # optimizer minimizes objective, hence provide negative score
         return optimizer.tell(

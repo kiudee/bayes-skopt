@@ -5,7 +5,7 @@ from skopt.utils import create_result, normalize_dimensions, is_listlike, is_2Dl
 
 from . import acquisition
 from .bayesgpr import BayesGPR
-from .utils import r2_sequence, guess_priors
+from .utils import r2_sequence, guess_priors, construct_default_kernel
 from bask.acquisition import evaluate_acquisitions
 
 __all__ = ["Optimizer"]
@@ -18,7 +18,7 @@ ACQUISITION_FUNC = {
     "pvrs": acquisition.PVRS(),
     "ts": acquisition.ThompsonSampling(),
     "ttei": acquisition.TopTwoEI(),
-    "vr": acquisition.VarianceReduction()
+    "vr": acquisition.VarianceReduction(),
 }
 
 
@@ -26,13 +26,13 @@ class Optimizer(object):
     def __init__(
         self,
         dimensions,
-        n_points=10000,
+        n_points=500,
         n_initial_points=10,
         init_strategy="r2",
         gp_kernel=None,
         gp_kwargs=None,
         gp_priors=None,
-        acq_func="mes",
+        acq_func="pvrs",
         acq_func_kwargs=None,
         random_state=None,
     ):
@@ -51,34 +51,68 @@ class Optimizer(object):
         self.n_initial_points_ = n_initial_points
         self.init_strategy = init_strategy
         if self.init_strategy == "r2":
-            self._initial_points = self.space.inverse_transform(r2_sequence(n=n_initial_points, d=self.space.n_dims))
+            self._initial_points = self.space.inverse_transform(
+                r2_sequence(n=n_initial_points, d=self.space.n_dims)
+            )
         self.n_points = n_points
 
         # TODO: Maybe a variant of cook estimator?
         # TODO: Construct kernel if None
         if gp_kwargs is None:
             gp_kwargs = dict()
+        if gp_kernel is None:
+            # For now the default kernel is not adapted to the dimensions,
+            # which is why a simple list is passed:
+            gp_kernel = construct_default_kernel(
+                list(range(self.space.transformed_n_dims))
+            )
+
+        self.gp = BayesGPR(
+            kernel=gp_kernel,
+            random_state=self.rng.randint(0, np.iinfo(np.int32).max),
+            **gp_kwargs,
+        )
+        # We are only able to guess priors now, since BayesGPR can add
+        # another WhiteKernel, when noise is set to "gaussian":
         if gp_priors is None:
-            gp_priors = guess_priors(n_parameters=self.space.transformed_n_dims)
+            gp_priors = guess_priors(self.gp.kernel)
         self.gp_priors = gp_priors
-        self.gp = BayesGPR(kernel=gp_kernel, random_state=self.rng.randint(0, np.iinfo(np.int32).max), **gp_kwargs)
 
         self.Xi = []
         self.yi = []
         self.noisei = []
         self._next_x = None
 
-    def ask(self):
-        if self._n_initial_points > 0:  # TODO: Make sure estimator is trained here always
+    def ask(self, n_points=1):
+        if n_points > 1:
+            raise NotImplementedError(
+                "Returning multiple points is not implemented yet."
+            )
+        if (
+            self._n_initial_points > 0
+        ):  # TODO: Make sure estimator is trained here always
             if self.init_strategy == "r2":
                 return self._initial_points[self._n_initial_points - 1]
             return self.space.rvs()
         else:
             if not self.gp.kernel_:
-                raise RuntimeError("Initialization is finished, but no model has been fit.")
+                raise RuntimeError(
+                    "Initialization is finished, but no model has been fit."
+                )
             return self._next_x
 
-    def tell(self, x, y, noise_vector=None, fit=True, replace=False, n_samples=5, gp_samples=100, gp_burnin=10, progress=False):
+    def tell(
+        self,
+        x,
+        y,
+        noise_vector=None,
+        fit=True,
+        replace=False,
+        n_samples=0,
+        gp_samples=100,
+        gp_burnin=10,
+        progress=False,
+    ):
         # if y isn't a scalar it means we have been handed a batch of points
 
         # TODO (noise vector):
@@ -96,7 +130,9 @@ class Optimizer(object):
             if noise_vector is None:
                 noise_vector = [0.0] * len(y)
             elif not is_listlike(noise_vector) or len(noise_vector) != len(y):
-                raise ValueError(f"Vector of noise variances needs to be of equal length as `y`.")
+                raise ValueError(
+                    f"Vector of noise variances needs to be of equal length as `y`."
+                )
             self.noisei.extend(noise_vector)
             self._n_initial_points -= len(y)
         elif is_listlike(x):
@@ -105,11 +141,16 @@ class Optimizer(object):
             if noise_vector is None:
                 noise_vector = 0.0
             elif is_listlike(noise_vector):
-                raise ValueError(f"Vector of noise variances is a list, while tell only received one datapoint.")
+                raise ValueError(
+                    f"Vector of noise variances is a list, while tell only received one datapoint."
+                )
             self.noisei.append(noise_vector)
             self._n_initial_points -= 1
         else:
-            raise ValueError(f"Type of arguments `x` ({type(x)}) and `y` ({type(y)}) " "not compatible.")
+            raise ValueError(
+                f"Type of arguments `x` ({type(x)}) and `y` ({type(y)}) "
+                "not compatible."
+            )
 
         if fit and self._n_initial_points <= 0:
             with warnings.catch_warnings():
@@ -132,10 +173,12 @@ class Optimizer(object):
                         priors=self.gp_priors,
                         n_desired_samples=gp_samples,
                         n_burnin=gp_burnin,
-                        progress=progress
+                        progress=progress,
                     )
 
-            X = self.space.transform(self.space.rvs(n_samples=self.n_points, random_state=self.rng))
+            X = self.space.transform(
+                self.space.rvs(n_samples=self.n_points, random_state=self.rng)
+            )
             acq_values = evaluate_acquisitions(
                 X=X,
                 gpr=self.gp,
@@ -146,7 +189,9 @@ class Optimizer(object):
                 **self.acq_func_kwargs,
             ).flatten()
 
-            self._next_x = self.space.inverse_transform(X[np.argmax(acq_values)].reshape((1, -1)))[0]
+            self._next_x = self.space.inverse_transform(
+                X[np.argmax(acq_values)].reshape((1, -1))
+            )[0]
 
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
 

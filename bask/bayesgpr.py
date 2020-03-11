@@ -219,7 +219,10 @@ class BayesGPR(GaussianProcessRegressor):
                     lp += prior(val)
             else:  # Assume priors is a callable, which evaluates the log probability:
                 lp += priors(x)
-            lp = lp + gp.log_marginal_likelihood(theta=x)
+            try:
+                lp = lp + gp.log_marginal_likelihood(theta=x)
+            except ValueError:
+                return -np.inf
             if not np.isfinite(lp):
                 return -np.inf
             return lp
@@ -330,4 +333,3 @@ class BayesGPR(GaussianProcessRegressor):
         self.alpha_ = current_alpha
         self.L_ = current_L
         return result
-

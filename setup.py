@@ -18,6 +18,7 @@ requirements = [
     "scikit-learn",
     "matplotlib",
     "emcee",
+    "tqdm"
 ]
 
 setup_requirements = [

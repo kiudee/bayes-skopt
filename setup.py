@@ -34,13 +34,16 @@ setup(
     author_email="kiudee@mail.upb.de",
     python_requires=">=3.7",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research"
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Topic :: Scientific/Engineering",
+        "Topic :: Software Development"
     ],
     description="A fully Bayesian implementation of sequential model-based optimization",
     entry_points={"console_scripts": ["bask=bask.cli:main",],},

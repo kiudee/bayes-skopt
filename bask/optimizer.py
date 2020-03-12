@@ -23,6 +23,79 @@ ACQUISITION_FUNC = {
 
 
 class Optimizer(object):
+    """Execute a stepwise Bayesian optimization.
+
+    Parameters
+    ----------
+    dimensions : list, shape (n_dims,)
+        List of search space dimensions.
+        Each search dimension can be defined either as
+
+        - a `(lower_bound, upper_bound)` tuple (for `Real` or `Integer`
+          dimensions),
+        - a `(lower_bound, upper_bound, "prior")` tuple (for `Real`
+          dimensions),
+        - as a list of categories (for `Categorical` dimensions), or
+        - an instance of a `Dimension` object (`Real`, `Integer` or
+          `Categorical`).
+    n_points : int, default=500
+        Number of random points to evaluate the acquisition function on.
+    n_initial_points : int, default=10
+        Number of initial points to sample before fitting the GP.
+    init_strategy : string or None, default="r2"
+        Sampling strategy to use for the initial ``n_initial_points``.
+        "r2" computes points using the quasirandom R2 sequence. If the value
+        is None or any other string, uniform random sampling is employed.
+    gp_kernel : kernel object
+        The kernel specifying the covariance function of the GP. If None is
+        passed, a suitable default kernel is constructed.
+        Note that the kernel’s hyperparameters are estimated using MCMC during
+        fitting.
+    gp_kwargs : dict, optional
+        Dict of arguments passed to :class:`BayesGPR`.  For example,
+        ``{'normalize_y': True}`` would allow the GP to normalize the output
+        values before fitting.
+    acq_func : string or Acquisition object, default="pvrs"
+        Acquisition function to use as a criterion to select new points to test.
+        By default we use "pvrs", which is a very robust criterion with fast
+        convergence.
+        Should be one of
+            - 'pvrs' Predictive variance reductions search
+            - 'mes' Max-value entropy search
+            - 'ei' Expected improvement
+            - 'ttei' Top-two expected improvement
+            - 'lcb' Lower confidence bound
+            - 'mean' Expected value of the GP
+            - 'ts' Thompson sampling
+            - 'vr' Global variance reduction
+        Can also be a custom :class:`Acquisition` object.
+    acq_func_kwargs : dict, optional
+        Dict of arguments passed to :class:`Acquisition`.
+    random_state : int or RandomState or None, optional, default=None
+        Pseudo random number generator state used for random uniform sampling
+        from lists of possible values instead of scipy.stats distributions.
+
+    Attributes
+    ----------
+    Xi : list
+        Points at which objective has been evaluated.
+    yi : scalar
+        Values of objective at corresponding points in `Xi`.
+    space : Space
+        An instance of :class:`skopt.space.Space`. Stores parameter search
+        space used to sample points, bounds, and type of parameters.
+    gp : BayesGPR object
+        The current underlying GP model, which is used to calculate the
+        acquisition function.
+    gp_priors : list of callables
+        List of prior distributions for the kernel hyperparameters of the GP.
+        Each callable returns the logpdf of the prior distribution.
+    n_initial_points_ : int
+        Number of initial points to sample
+    noisei : list of floats
+        Additional pointwise noise which is added to the diagonal of the
+        kernel matrix
+    """
     def __init__(
         self,
         dimensions,
@@ -56,8 +129,6 @@ class Optimizer(object):
             )
         self.n_points = n_points
 
-        # TODO: Maybe a variant of cook estimator?
-        # TODO: Construct kernel if None
         if gp_kwargs is None:
             gp_kwargs = dict()
         if gp_kernel is None:

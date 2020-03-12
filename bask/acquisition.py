@@ -55,6 +55,41 @@ def evaluate_acquisitions(
     random_state=None,
     **kwargs
 ):
+    """Run a set of acquisitions functions on a given set of points.
+
+    Parameters
+    ----------
+    X : ndarray, shape (n, d), float
+        Set of points for which to evaluate the acquisition functions
+    gpr : BayesGPR object
+        Gaussian process for which the posterior distribution of the kernel
+        hyperparameters is available.
+    acquisition_functions : list of Acquisition objects
+        List of aquisition functions to evaluate.
+        They each should inherit from one of these:
+            - :class:`FullGPAcquisition`
+            - :class:`UncertaintyAcquisition`
+            - :class:`SampleAcquisition`
+    n_samples : int, default=10
+        Number of posterior samples to draw from the GP. The acquisition
+        functions will be evaluated for each of the sampled kernels.
+        Exceptions are Acquisition functions inheriting from
+        :class:`FullGPAcquisition`.
+    progress : bool, default=False
+        Show a progress bar
+    random_state : int or RandomState or None, optional, default=None
+        Pseudo random number generator state used for random uniform sampling
+        from lists of possible values instead of scipy.stats distributions.
+    kwargs : dict
+        Any additional keyword arguments are passed on to each acquisition
+        function.
+
+    Returns
+    -------
+    acq_output : float ndarray, shape (len(acquisition_functions), len(X))
+        The acquisition functions evaluated on all of the input points.
+
+    """
     n_cand_points = len(X)
     n_acqs = len(acquisition_functions)
     acq_output = np.zeros((n_acqs, n_cand_points))
@@ -97,6 +132,16 @@ def _ei_f(x):
 
 
 class ExpectedImprovement(UncertaintyAcquisition):
+    """Select the point maximizing the expected improvement over the current
+    optimum.
+
+    Parameters
+    ----------
+    y_opt : float, default=None
+        The value of the current optimum. If it is None, it will use the
+        minimum y value of the evaluated points.
+    """
+
     def __call__(self, mu, std, *args, y_opt=None, **kwargs):
         if y_opt is None:
             y_opt = mu.min()
@@ -108,6 +153,16 @@ class ExpectedImprovement(UncertaintyAcquisition):
 
 
 class TopTwoEI(ExpectedImprovement):
+    """Select the point with the highest expected improvement over the
+    point with the maximum expected improvement overall.
+
+    Parameters
+    ----------
+    y_opt : float, default=None
+        The value of the current optimum. If it is None, it will use the
+        minimum y value of the evaluated points.
+    """
+
     def __call__(self, mu, std, *args, y_opt=None, **kwargs):
         ei = super().__call__(mu, std, *args, y_opt=y_opt, **kwargs)
         values = np.zeros_like(mu)
@@ -120,18 +175,42 @@ class TopTwoEI(ExpectedImprovement):
 
 
 class Expectation(UncertaintyAcquisition):
+    """Select the point with the lowest estimated mean."""
+
     def __call__(self, mu, std, *args, **kwargs):
         return -mu
 
 
 class LCB(UncertaintyAcquisition):
-    def __call__(self, mu, std, *args, alpha=1.86, **kwargs):
+    """Select the point with the lowest lower confidence bound.
+
+    Parameters
+    ----------
+    alpha : positive float, alpha=1.96
+        Number of standard errors to substract from the mean estimate.
+    """
+
+    def __call__(self, mu, std, *args, alpha=1.96, **kwargs):
         if alpha == "inf":
             return std
         return alpha * std - mu
 
 
 class MaxValueSearch(UncertaintyAcquisition):
+    """Select points based on their mutual information with the optimum value.
+
+    Parameters
+    ----------
+    n_min_samples : int, default=1000
+        Number of samples for the optimum distribution
+
+    References
+    ----------
+    [1] Wang, Z. & Jegelka, S.. (2017). Max-value Entropy Search for Efficient
+        Bayesian Optimization. Proceedings of the 34th International Conference
+        on Machine Learning, in PMLR 70:3627-3635
+    """
+
     def __call__(self, mu, std, *args, n_min_samples=1000, **kwargs):
         def probf(x):
             return np.exp(np.sum(st.norm.logcdf(-(x - mu) / std), axis=0))
@@ -166,12 +245,19 @@ class MaxValueSearch(UncertaintyAcquisition):
 
 
 class ThompsonSampling(SampleAcquisition):
+    """Sample a random function from the GP and select its optimum."""
+
     def __call__(self, gp_sample, *args, **kwargs):
         return -gp_sample
 
 
 class VarianceReduction(FullGPAcquisition):
-    """ A criterion which tries to find the region where it can reduce the variance the most."""
+    """A criterion which tries to find the region where it can reduce the
+    global variance the most.
+
+    This criterion is suitable for active learning, where the goal is to
+    uniformly estimate the target function and not only its optimum.
+    """
 
     def __call__(self, X, gp, *args, **kwargs):
         n = len(X)
@@ -192,13 +278,14 @@ class VarianceReduction(FullGPAcquisition):
 class PVRS(FullGPAcquisition):
     """Implements the predictive variance reduction search algorithm.
 
-    The algorithm draws a set of Thompson samples (samples from the optimum distribution) and proposes the point which
-    reduces the predictive variance of these samples the most.
+    The algorithm draws a set of Thompson samples (samples from the optimum
+    distribution) and proposes the point which reduces the predictive variance
+    of these samples the most.
 
     References
     ----------
-    [1] Nguyen, Vu, et al. "Predictive variance reduction search." Workshop on Bayesian optimization at neural
-        information processing systems (NIPSW). 2017.
+    [1] Nguyen, Vu, et al. "Predictive variance reduction search." Workshop on
+    Bayesian optimization at neural information processing systems (NIPSW). 2017.
     """
 
     def __call__(self, X, gp, *args, n_thompson=10, random_state=None, **kwargs):

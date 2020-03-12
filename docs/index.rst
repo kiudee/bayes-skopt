@@ -8,7 +8,7 @@ Welcome to Bayes-skopt's documentation!
    readme
    installation
    usage
-   modules
+   modules/classes
    contributing
    authors
    history

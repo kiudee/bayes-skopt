@@ -7,7 +7,7 @@ History
 
 * Add predictive variance reduction search criterion. This is the new default
   acquisition function.
-* Implement :class:`BayesSearchCV` for use with scikit-learn estimators and
+* Implement ``BayesSearchCV`` for use with scikit-learn estimators and
   pipelines. This is an easy to use drop-in replacement for GridSearchCV or
   RandomSearchCV. It is implemented as a wrapper around skopt.BayesSearchCV.
 * Determine default kernels and priors to use, if the user provides none.

@@ -162,6 +162,22 @@ def phi(d, n_iter=10):
 
 
 def r2_sequence(n, d, seed=0.5):
+    """Output ``n`` points of the infinite R2 quasi-random sequence.
+
+    Parameters
+    ----------
+    n : int
+        Number of points to generate
+    d : int
+        Number of dimensions for each point
+    seed : float in [0, 1], default=0.5
+        Seed value for the sequence
+
+    Returns
+    -------
+    z : ndarray, shape (n, d)
+        ``n`` points of the R2 sequence
+    """
     g = phi(d)
     alpha = np.zeros(d)
     for j in range(d):

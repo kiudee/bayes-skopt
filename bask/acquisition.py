@@ -55,6 +55,41 @@ def evaluate_acquisitions(
     random_state=None,
     **kwargs
 ):
+    """Run a set of acquisitions functions on a given set of points.
+
+    Parameters
+    ----------
+    X : ndarray, shape (n, d), float
+        Set of points for which to evaluate the acquisition functions
+    gpr : BayesGPR object
+        Gaussian process for which the posterior distribution of the kernel
+        hyperparameters is available.
+    acquisition_functions : list of Acquisition objects
+        List of aquisition functions to evaluate.
+        They each should inherit from one of these:
+            - :class:`FullGPAcquisition`
+            - :class:`UncertaintyAcquisition`
+            - :class:`SampleAcquisition`
+    n_samples : int, default=10
+        Number of posterior samples to draw from the GP. The acquisition
+        functions will be evaluated for each of the sampled kernels.
+        Exceptions are Acquisition functions inheriting from
+        :class:`FullGPAcquisition`.
+    progress : bool, default=False
+        Show a progress bar
+    random_state : int or RandomState or None, optional, default=None
+        Pseudo random number generator state used for random uniform sampling
+        from lists of possible values instead of scipy.stats distributions.
+    kwargs : dict
+        Any additional keyword arguments are passed on to each acquisition
+        function.
+
+    Returns
+    -------
+    acq_output : float ndarray, shape (len(acquisition_functions), len(X))
+        The acquisition functions evaluated on all of the input points.
+
+    """
     n_cand_points = len(X)
     n_acqs = len(acquisition_functions)
     acq_output = np.zeros((n_acqs, n_cand_points))

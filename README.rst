@@ -1,7 +1,7 @@
 
 
 
-.. image:: https://github.com/kiudee/bayes-skopt/raw/header/docs/images/header.png
+.. image:: https://github.com/kiudee/bayes-skopt/raw/master/docs/images/header.png
    :width: 800 px
    :alt: Bayes-skopt header
    :align: center

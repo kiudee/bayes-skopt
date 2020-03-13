@@ -1,7 +1,14 @@
+
+
+
+.. image:: https://github.com/kiudee/bayes-skopt/raw/master/docs/images/header.png
+   :width: 800 px
+   :alt: Bayes-skopt header
+   :align: center
+
 ===========
 Bayes-skopt
 ===========
-
 
 .. image:: https://mybinder.org/badge_logo.svg
         :target: https://mybinder.org/v2/gh/kiudee/bayes-skopt/master?filepath=examples

@@ -4,7 +4,7 @@ Bayes-skopt
 ===========
 
 .. image:: https://github.com/kiudee/bayes-skopt/raw/header/docs/images/header.svg?sanitize=true
-   :width: 800px
+   :width: 600px
    :alt: Bayes-skopt header
    :align: center
 

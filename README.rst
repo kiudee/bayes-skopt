@@ -1,6 +1,12 @@
+
 ===========
 Bayes-skopt
 ===========
+
+.. image:: https://github.com/kiudee/bayes-skopt/raw/master/docs/images/header.svg
+    :width: 800px
+    :alt: Bayes-skopt header
+    :align: center
 
 
 .. image:: https://mybinder.org/badge_logo.svg

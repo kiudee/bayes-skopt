@@ -3,8 +3,8 @@
 Bayes-skopt
 ===========
 
-.. image:: https://github.com/kiudee/bayes-skopt/raw/header/docs/images/header.svg?sanitize=true
-   :width: 600px
+.. image:: https://github.com/kiudee/bayes-skopt/raw/header/docs/images/header.png
+   :width: 800
    :alt: Bayes-skopt header
    :align: center
 

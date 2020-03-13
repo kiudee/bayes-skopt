@@ -3,7 +3,7 @@
 Bayes-skopt
 ===========
 
-.. image:: https://github.com/kiudee/bayes-skopt/raw/master/docs/images/header.svg
+.. image:: https://github.com/kiudee/bayes-skopt/raw/header/docs/images/header.svg
     :width: 800px
     :alt: Bayes-skopt header
     :align: center

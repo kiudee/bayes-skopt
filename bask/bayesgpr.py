@@ -143,7 +143,16 @@ class BayesGPR(GaussianProcessRegressor):
         else:
             self._kernel = kernel.clone_with_theta(kernel.theta)
         random_state = check_random_state(random_state)
-        super().__init__(kernel, alpha, optimizer, n_restarts_optimizer, normalize_y, copy_X_train, random_state, noise)
+        super().__init__(
+            kernel,
+            alpha,
+            optimizer,
+            n_restarts_optimizer,
+            normalize_y,
+            copy_X_train,
+            random_state,
+            noise,
+        )
         self._alpha = self.alpha
         self._sampler = None
         self.chain_ = None
@@ -194,7 +203,7 @@ class BayesGPR(GaussianProcessRegressor):
                 alpha = np.ones(n_instances) * self.alpha
             elif not np.iterable(self._alpha):  # we already changed self.alpha before
                 alpha = np.ones(n_instances) * self._alpha
-            alpha[:len(noise_vector)] += noise_vector
+            alpha[: len(noise_vector)] += noise_vector
             self.alpha = alpha
 
     def sample(
@@ -227,6 +236,14 @@ class BayesGPR(GaussianProcessRegressor):
                 return -np.inf
             return lp
 
+        if X is None and not hasattr(self, "X_train_"):
+            raise ValueError(
+                """
+                It looks like you are trying to sample from the GP posterior without data. Pass X and y, or ensure that
+                you call fit before sample.
+                """
+            )
+
         # Update data, if available:
         if X is not None:
             if self.normalize_y:
@@ -256,11 +273,19 @@ class BayesGPR(GaussianProcessRegressor):
         if pos is None:
             theta = self.theta
             theta[np.isinf(theta)] = np.log(self.noise_)
-            pos = [theta + 1e-2 * self.random_state.randn(n_dim) for _ in range(n_walkers)]
+            pos = [
+                theta + 1e-2 * self.random_state.randn(n_dim) for _ in range(n_walkers)
+            ]
         self._sampler = mc.EnsembleSampler(
-            nwalkers=n_walkers, ndim=n_dim, log_prob_fn=log_prob_fn, threads=n_threads, **kwargs
+            nwalkers=n_walkers,
+            ndim=n_dim,
+            log_prob_fn=log_prob_fn,
+            threads=n_threads,
+            **kwargs
         )
-        rng = np.random.RandomState(self.random_state.randint(0, np.iinfo(np.int32).max))
+        rng = np.random.RandomState(
+            self.random_state.randint(0, np.iinfo(np.int32).max)
+        )
         self._sampler.random_state = rng.get_state()
         pos, prob, state = self._sampler.run_mcmc(pos, n_samples, progress=progress)
         # if backup_file is not None:
@@ -327,7 +352,9 @@ class BayesGPR(GaussianProcessRegressor):
             else:
                 cm = self.noise_set_to_zero()
             with cm:
-                result[:, i] = super().sample_y(X, n_samples=1, random_state=rng).flatten()
+                result[:, i] = (
+                    super().sample_y(X, n_samples=1, random_state=rng).flatten()
+                )
         self.kernel_.theta = current_theta
         self.K_inv_ = current_K_inv
         self.alpha_ = current_alpha

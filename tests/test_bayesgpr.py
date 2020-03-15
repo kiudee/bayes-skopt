@@ -44,3 +44,9 @@ def test_noise_set_to_zero(minimal_gp, minimal_priors):
     assert minimal_gp.predict(np.array([[0.0]]), return_std=True)[1] >= 1.0
 
 
+def test_sample_without_fit(minimal_gp):
+    # Calling sample without data (X, y) or a previous fit, should raise a ValueError:
+    with pytest.raises(ValueError):
+        minimal_gp.sample()
+
+

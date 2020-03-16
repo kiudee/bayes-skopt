@@ -47,3 +47,7 @@ def test_noise_vector():
     # Check, if passing a single point works correctly:
     x = opt.ask()
     opt.tell(x, 0.0, noise_vector=0.5)
+
+
+def test_no_error_on_unknown_kwargs():
+    opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5, unknown_argument=42)

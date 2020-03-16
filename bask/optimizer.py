@@ -108,6 +108,7 @@ class Optimizer(object):
         acq_func="pvrs",
         acq_func_kwargs=None,
         random_state=None,
+        **kwargs
     ):
         self.rng = check_random_state(random_state)
 

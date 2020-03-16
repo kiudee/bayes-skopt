@@ -2,6 +2,11 @@
 History
 =======
 
+0.3.3 (2020-03-16)
+------------------
+
+* Fix error occuring when an unknown argument was passed to ``Optimizer``.
+
 0.3.0 (2020-03-12)
 ------------------
 

@@ -116,7 +116,7 @@ class BayesSearchCV(BayesSearchCVSK):
         scores.
     Examples
     --------
-    >>> from skopt import BayesSearchCV
+    >>> from bask import BayesSearchCV
     >>> # parameter ranges are specified by one of below
     >>> from skopt.space import Real, Categorical, Integer
     >>>

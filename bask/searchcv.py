@@ -1,7 +1,9 @@
+import logging
 import numpy as np
 from scipy.stats import rankdata
+from sklearn.utils.validation import check_is_fitted
 from skopt import BayesSearchCV as BayesSearchCVSK
-from skopt.utils import point_asdict, dimensions_aslist
+from skopt.utils import point_asdict, dimensions_aslist, expected_minimum, create_result
 from bask.optimizer import Optimizer
 
 
@@ -52,6 +54,20 @@ class BayesSearchCV(BayesSearchCVSK):
         off runtime vs quality of the solution. Consider increasing
         ``n_points`` if you want to try more parameter settings in
         parallel.
+    return_policy : string, default='best_setting'
+        A string specifying which point should be considered the optimum
+        at the end of the optimization. Should be one of
+
+            - 'best_mean': return the point maximizing the mean function
+              of the Gaussian process. This is usually the best choice
+              when the target function is noisy and a single
+              observation might not be representative.
+              Note, if the number of iterations ``n_iter`` is low, the
+              expected optimum can be still be uncertain.
+              Only use this setting when you only have one search space.
+            - 'best_setting': return the best setting tried so far.
+              This is useful, if the target function is (almost)
+              noise-free.
     optimizer_kwargs : dict, optional
         Dict of arguments passed to :class:`Optimizer`.
     scoring : string, callable or None, default=None
@@ -234,6 +250,7 @@ class BayesSearchCV(BayesSearchCVSK):
         search_spaces,
         optimizer_kwargs=None,
         n_iter=50,
+        return_policy="best_setting",
         scoring=None,
         fit_params=None,
         n_jobs=1,
@@ -265,6 +282,7 @@ class BayesSearchCV(BayesSearchCVSK):
             error_score,
             return_train_score,
         )
+        self.return_policy = return_policy
         if self.optimizer_kwargs is None:
             self.optimizer_kwargs = {}
         self.n_samples = self.optimizer_kwargs.get("n_samples", 0)
@@ -298,6 +316,29 @@ class BayesSearchCV(BayesSearchCVSK):
             optimizer.space.dimensions[i].name = list(sorted(params_space.keys()))[i]
 
         return optimizer
+
+    @property
+    def best_params_(self):
+        check_is_fitted(self, "cv_results_")
+        if self.return_policy == "best_setting" or len(self.optimizers_) > 1:
+            if len(self.optimizers_) > 1:
+                logging.warning(
+                    "Return policy 'best_mean' is incompatible with multiple search spaces."
+                    " Reverting to 'best_setting'."
+                )
+            return self.cv_results_["params"][self.best_index_]
+        if self.return_policy == "best_mean":
+            random_state = self.optimizer_kwargs_["random_state"]
+            # We construct a result object manually here, since in skopt versions up to 0.7.4 they were not saved yet:
+            opt = self.optimizers_[0]
+            result_object = create_result(opt.Xi, opt.yi, space=opt.space, rng=random_state, models=[opt.gp])
+            point, _ = expected_minimum(
+                res=result_object,
+                n_random_starts=100,
+                random_state=random_state,
+            )
+            dict = point_asdict(self.search_spaces, point)
+            return dict
 
     def _step(self, X, y, search_space, optimizer, groups=None, n_points=1):
         """Generate n_jobs parameters and evaluate them in parallel."""
@@ -344,7 +385,7 @@ class BayesSearchCV(BayesSearchCVSK):
         self.best_index_ = np.argmax(self.cv_results_["mean_test_score"])
 
         # feed the point and objective back into optimizer
-        local_results = self.cv_results_["mean_test_score"][-len(params):]
+        local_results = self.cv_results_["mean_test_score"][-len(params) :]
 
         # optimizer minimizes objective, hence provide negative score
         return optimizer.tell(

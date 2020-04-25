@@ -331,11 +331,11 @@ class BayesSearchCV(BayesSearchCVSK):
             random_state = self.optimizer_kwargs_["random_state"]
             # We construct a result object manually here, since in skopt versions up to 0.7.4 they were not saved yet:
             opt = self.optimizers_[0]
-            result_object = create_result(opt.Xi, opt.yi, space=opt.space, rng=random_state, models=[opt.gp])
+            result_object = create_result(
+                opt.Xi, opt.yi, space=opt.space, rng=random_state, models=[opt.gp]
+            )
             point, _ = expected_minimum(
-                res=result_object,
-                n_random_starts=100,
-                random_state=random_state,
+                res=result_object, n_random_starts=100, random_state=random_state,
             )
             dict = point_asdict(self.search_spaces, point)
             return dict

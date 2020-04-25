@@ -43,7 +43,7 @@ def test_searchcv_best_mean():
         },
         n_iter=11,
         cv=None,
-        return_policy="best_mean"
+        return_policy="best_mean",
     )
 
     opt.fit(X_train, y_train)

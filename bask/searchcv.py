@@ -1,9 +1,14 @@
 import logging
+
 import numpy as np
 from scipy.stats import rankdata
 from sklearn.utils.validation import check_is_fitted
 from skopt import BayesSearchCV as BayesSearchCVSK
-from skopt.utils import point_asdict, dimensions_aslist, expected_minimum, create_result
+from skopt.utils import create_result
+from skopt.utils import dimensions_aslist
+from skopt.utils import expected_minimum
+from skopt.utils import point_asdict
+
 from bask.optimizer import Optimizer
 
 

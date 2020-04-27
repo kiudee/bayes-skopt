@@ -2,6 +2,12 @@
 History
 =======
 
+0.4.0 (2020-04-27)
+------------------
+
+* Add ``return_policy`` parameter to ``BayesSearchCV``. Allows the user to choose between returning the best
+  observed configuration (in a noise-less setting) or the best predicted configuration (for noisy targets).
+
 0.3.3 (2020-03-16)
 ------------------
 

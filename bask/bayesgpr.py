@@ -222,6 +222,7 @@ class BayesGPR(GaussianProcessRegressor):
         add=False,
         **kwargs
     ):
+        """ Sample from the posterior distribution of the hyper-parameters."""
         def log_prob_fn(x, gp=self):
             lp = 0
             if isinstance(priors, Iterable):

@@ -15,7 +15,7 @@ requirements = [
     "scikit-optimize",
     "numpy",
     "scipy",
-    "scikit-learn",
+    "scikit-learn>=0.18.2,<0.23",
     "matplotlib",
     "emcee",
     "tqdm"

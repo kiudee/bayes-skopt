@@ -214,6 +214,7 @@ class BayesGPR(GaussianProcessRegressor):
         n_threads=1,
         n_desired_samples=100,
         n_burnin=0,
+        n_thin=1,
         n_walkers_per_thread=100,
         progress=False,
         priors=None,
@@ -291,7 +292,7 @@ class BayesGPR(GaussianProcessRegressor):
         # if backup_file is not None:
         #     with open(backup_file, "wb") as f:
         #         np.save(f, pos)
-        chain = self._sampler.chain[:, n_burnin:, :].reshape(-1, n_dim)
+        chain = self._sampler.get_chain(flat=True, discard=n_burnin, thin=n_thin)
         if add and self.chain_ is not None:
             self.chain_ = np.concatenate([self.chain_, chain])
         else:

@@ -1,7 +1,13 @@
 import warnings
 import numpy as np
 from sklearn.utils import check_random_state
-from skopt.utils import create_result, normalize_dimensions, is_listlike, is_2Dlistlike
+from skopt.utils import (
+    create_result,
+    normalize_dimensions,
+    is_listlike,
+    is_2Dlistlike,
+    expected_minimum,
+)
 
 from . import acquisition
 from .bayesgpr import BayesGPR
@@ -96,6 +102,7 @@ class Optimizer(object):
         Additional pointwise noise which is added to the diagonal of the
         kernel matrix
     """
+
     def __init__(
         self,
         dimensions,
@@ -108,7 +115,7 @@ class Optimizer(object):
         acq_func="pvrs",
         acq_func_kwargs=None,
         random_state=None,
-        **kwargs
+        **kwargs,
     ):
         self.rng = check_random_state(random_state)
 
@@ -273,3 +280,69 @@ class Optimizer(object):
             self.tell(x, func(x), n_samples=n_samples, gp_burnin=gp_burnin)
 
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
+
+    def probability_of_optimality(
+        self,
+        threshold,
+        n_space_samples=500,
+        n_gp_samples=200,
+        n_random_starts=100,
+        use_mean_gp=True,
+        random_state=None,
+    ):
+        """ Compute the probability that the current expected optimum cannot be improved by more than ``threshold``
+        points.
+
+        Parameters
+        ----------
+        threshold : float or list-of-floats
+            Other points have to be better than the current optimum by at least a margin of size ``threshold``.
+            If a list is passed, this will return a list of probabilities.
+        n_space_samples : int, default=500
+            Number of random samples used to cover the optimization space.
+        n_gp_samples : int, default=200
+            Number of functions to sample from the Gaussian process.
+        n_random_starts : int, default=100
+            Number of random positions to start the optimizer from in order to determine the global optimum.
+        use_mean_gp : bool, default=True
+            If True, random functions will be sampled from the consensus GP, which is usually faster, but could
+            underestimate the variability. If False, the posterior distribution over hyperparameters is used to sample
+            different GPs and then sample functions.
+        random_state : int, RandomState instance, or None (default)
+            Set random state to something other than None for reproducible results.
+
+        Returns
+        -------
+        probabilities : float or list-of-floats
+            Probabilities of the current optimum to be optimal wrt the given thresholds.
+        """
+        result = create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
+        X_orig = [
+            expected_minimum(
+                result, random_state=random_state, n_random_starts=n_random_starts
+            )[0]
+        ]
+
+        X_orig.extend(
+            self.space.rvs(n_samples=n_space_samples, random_state=random_state)
+        )
+        X_trans = self.space.transform(X_orig)
+        score_samples = self.gp.sample_y(
+            X_trans,
+            n_samples=n_gp_samples,
+            sample_mean=use_mean_gp,
+            random_state=random_state,
+        )
+
+        if not is_listlike(threshold):
+            threshold = [threshold]
+        probabilities = []
+        for eps in threshold:
+            probabilities.append(
+                (
+                    (score_samples[0][None, :] - eps - score_samples).max(axis=0) < 0.0
+                ).mean()
+            )
+        if len(probabilities) == 1:
+            return probabilities[0]
+        return probabilities

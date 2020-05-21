@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+from scipy.optimize import minimize_scalar
 from sklearn.utils import check_random_state
 from skopt.utils import (
     create_result,
@@ -346,3 +347,55 @@ class Optimizer(object):
         if len(probabilities) == 1:
             return probabilities[0]
         return probabilities
+
+    def expected_optimality_gap(
+        self,
+        max_tries=3,
+        n_probabilities=50,
+        n_space_samples=500,
+        n_gp_samples=200,
+        n_random_starts=100,
+        tol=0.01,
+        use_mean_gp=True,
+        random_state=None,
+    ):
+        random_state = check_random_state(random_state)
+        seed = random_state.randint(0, 2 ** 32 - 1, dtype=np.int64)
+
+        def func(threshold):
+            prob = self.probability_of_optimality(
+                threshold=threshold,
+                n_random_starts=n_random_starts,
+                n_gp_samples=n_gp_samples,
+                n_space_samples=n_space_samples,
+                use_mean_gp=use_mean_gp,
+                random_state=seed,
+            )
+            return (prob - 1.0) ** 2 + threshold ** 2 * 1e-3
+
+        max_observed_gap = np.max(self.yi) - np.min(self.yi)
+        for _ in range(max_tries):
+            try:
+                upper_threshold = minimize_scalar(
+                    func, bounds=(0.0, max_observed_gap), tol=tol
+                ).x
+                break
+            except ValueError:
+                pass
+        else:
+            raise ValueError("Determining the upper threshold was not possible.")
+
+        thresholds = list(np.linspace(0, upper_threshold, num=n_probabilities))
+        probabilities = self.probability_of_optimality(
+            thresholds,
+            n_random_starts=n_random_starts,
+            n_gp_samples=n_gp_samples,
+            n_space_samples=n_space_samples,
+            use_mean_gp=use_mean_gp,
+            random_state=seed,
+        )
+        expected_gap = 0.0
+        for i in range(0, len(probabilities) - 1):
+            p = probabilities[i + 1] - probabilities[i]
+            expected_gap += p * thresholds[i + 1]
+        return expected_gap

@@ -1,5 +1,6 @@
 import warnings
 import numpy as np
+from scipy.optimize import minimize_scalar
 from sklearn.utils import check_random_state
 from skopt.utils import (
     create_result,
@@ -346,3 +347,86 @@ class Optimizer(object):
         if len(probabilities) == 1:
             return probabilities[0]
         return probabilities
+
+    def expected_optimality_gap(
+        self,
+        max_tries=3,
+        n_probabilities=50,
+        n_space_samples=500,
+        n_gp_samples=200,
+        n_random_starts=100,
+        tol=0.01,
+        use_mean_gp=True,
+        random_state=None,
+    ):
+        """ Estimate the expected optimality gap by repeatedly sampling functions consistent with the data.
+
+        Parameters
+        ----------
+        max_tries : int, default=3
+            Maximum amount of tries to compute the current global optimum.
+            Raises a ValueError, if it fails.
+        n_probabilities : int, default=50
+            Number of probabilities to calculate in order to estimate the cumulative distribution function for the
+            optimality gap.
+        n_space_samples : int, default=500
+            Number of random samples used to cover the optimization space.
+        n_gp_samples : int, default=200
+            Number of functions to sample from the Gaussian process.
+        n_random_starts : int, default=100
+            Number of random positions to start the optimizer from in order to determine the global optimum.
+        tol : float, default=0.01
+            Tolerance with which to determine the upper bound for the optimality gap.
+        use_mean_gp : bool, default=True
+            If True, random functions will be sampled from the consensus GP, which is usually faster, but could
+            underestimate the variability. If False, the posterior distribution over hyperparameters is used to sample
+            different GPs and then sample functions.
+        random_state : int, RandomState instance, or None (default)
+            Set random state to something other than None for reproducible results.
+
+        Returns
+        -------
+        expected_gap : float
+            The expected optimality gap of the current global optimum with respect to randomly sampled,
+             consistent optima.
+        """
+        random_state = check_random_state(random_state)
+        seed = random_state.randint(0, 2 ** 32 - 1, dtype=np.int64)
+
+        def func(threshold):
+            prob = self.probability_of_optimality(
+                threshold=threshold,
+                n_random_starts=n_random_starts,
+                n_gp_samples=n_gp_samples,
+                n_space_samples=n_space_samples,
+                use_mean_gp=use_mean_gp,
+                random_state=seed,
+            )
+            return (prob - 1.0) ** 2 + threshold ** 2 * 1e-3
+
+        max_observed_gap = np.max(self.yi) - np.min(self.yi)
+        for _ in range(max_tries):
+            try:
+                upper_threshold = minimize_scalar(
+                    func, bounds=(0.0, max_observed_gap), tol=tol
+                ).x
+                break
+            except ValueError:
+                pass
+        else:
+            raise ValueError("Determining the upper threshold was not possible.")
+
+        thresholds = list(np.linspace(0, upper_threshold, num=n_probabilities))
+        probabilities = self.probability_of_optimality(
+            thresholds,
+            n_random_starts=n_random_starts,
+            n_gp_samples=n_gp_samples,
+            n_space_samples=n_space_samples,
+            use_mean_gp=use_mean_gp,
+            random_state=seed,
+        )
+        expected_gap = 0.0
+        for i in range(0, len(probabilities) - 1):
+            p = probabilities[i + 1] - probabilities[i]
+            expected_gap += p * thresholds[i + 1]
+        return expected_gap

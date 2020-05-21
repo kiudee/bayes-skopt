@@ -156,6 +156,8 @@ class Optimizer(object):
         # another WhiteKernel, when noise is set to "gaussian":
         if gp_priors is None:
             gp_priors = guess_priors(self.gp.kernel)
+        elif len(gp_priors) != self.space.transformed_n_dims + 2:
+            raise ValueError("The number of priors does not match the number of dimensions + 2.")
         self.gp_priors = gp_priors
 
         self.Xi = []

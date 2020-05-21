@@ -17,7 +17,7 @@ requirements = [
     "scipy",
     "scikit-learn>=0.18.2,<0.23",
     "matplotlib",
-    "emcee",
+    "emcee>=3.0",
     "tqdm"
 ]
 

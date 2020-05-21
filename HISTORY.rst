@@ -2,6 +2,14 @@
 History
 =======
 
+0.6.0 (2020-05-21)
+------------------
+
+* Add ``Optimizer.expected_optimality_gap`` which estimates the expected optimality gap of the current global optimum
+  to random optima sampled from the Gaussian process.
+* Check that the list of priors has the correct length.
+* Require emcee to be at least version 3.0.
+
 0.5.0 (2020-05-21)
 ------------------
 

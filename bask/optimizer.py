@@ -290,6 +290,32 @@ class Optimizer(object):
         use_mean_gp=True,
         random_state=None,
     ):
+        """ Compute the probability that the current expected optimum cannot be improved by more than ``threshold``
+        points.
+
+        Parameters
+        ----------
+        threshold : float or list-of-floats
+            Other points have to be better than the current optimum by at least a margin of size ``threshold``.
+            If a list is passed, this will return a list of probabilities.
+        n_space_samples : int, default=500
+            Number of random samples used to cover the optimization space.
+        n_gp_samples : int, default=200
+            Number of functions to sample from the Gaussian process.
+        n_random_starts : int, default=100
+            Number of random positions to start the optimizer from in order to determine the global optimum.
+        use_mean_gp : bool, default=True
+            If True, random functions will be sampled from the consensus GP, which is usually faster, but could
+            underestimate the variability. If False, the posterior distribution over hyperparameters is used to sample
+            different GPs and then sample functions.
+        random_state : int, RandomState instance, or None (default)
+            Set random state to something other than None for reproducible results.
+
+        Returns
+        -------
+        probabilities : float or list-of-floats
+            Probabilities of the current optimum to be optimal wrt the given thresholds.
+        """
         result = create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
         X_orig = [
             expected_minimum(

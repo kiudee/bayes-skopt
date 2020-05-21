@@ -71,4 +71,4 @@ def test_probability_of_improvement(random_state):
     np.testing.assert_almost_equal(prob, 0.995)
 
     prob = opt.probability_of_optimality(threshold=[0.9, 0.5], n_random_starts=20, random_state=random_state)
-    np.testing.assert_almost_equal(prob, [0.925, 0.765])
+    np.testing.assert_almost_equal(prob, [0.925, 0.765], decimal=1)

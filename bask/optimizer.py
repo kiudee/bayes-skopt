@@ -359,6 +359,37 @@ class Optimizer(object):
         use_mean_gp=True,
         random_state=None,
     ):
+        """ Estimate the expected optimality gap by repeatedly sampling functions consistent with the data.
+
+        Parameters
+        ----------
+        max_tries : int, default=3
+            Maximum amount of tries to compute the current global optimum.
+            Raises a ValueError, if it fails.
+        n_probabilities : int, default=50
+            Number of probabilities to calculate in order to estimate the cumulative distribution function for the
+            optimality gap.
+        n_space_samples : int, default=500
+            Number of random samples used to cover the optimization space.
+        n_gp_samples : int, default=200
+            Number of functions to sample from the Gaussian process.
+        n_random_starts : int, default=100
+            Number of random positions to start the optimizer from in order to determine the global optimum.
+        tol : float, default=0.01
+            Tolerance with which to determine the upper bound for the optimality gap.
+        use_mean_gp : bool, default=True
+            If True, random functions will be sampled from the consensus GP, which is usually faster, but could
+            underestimate the variability. If False, the posterior distribution over hyperparameters is used to sample
+            different GPs and then sample functions.
+        random_state : int, RandomState instance, or None (default)
+            Set random state to something other than None for reproducible results.
+
+        Returns
+        -------
+        expected_gap : float
+            The expected optimality gap of the current global optimum with respect to randomly sampled,
+             consistent optima.
+        """
         random_state = check_random_state(random_state)
         seed = random_state.randint(0, 2 ** 32 - 1, dtype=np.int64)
 

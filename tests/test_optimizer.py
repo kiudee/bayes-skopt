@@ -1,6 +1,13 @@
+import numpy as np
+import pytest
 from bask.optimizer import Optimizer
 from sklearn.utils.testing import assert_equal
 from skopt.benchmarks import bench1
+
+
+@pytest.fixture
+def random_state():
+    return np.random.RandomState(123)
 
 
 def test_multiple_asks():
@@ -51,3 +58,17 @@ def test_noise_vector():
 
 def test_no_error_on_unknown_kwargs():
     opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5, unknown_argument=42)
+
+
+def test_probability_of_improvement(random_state):
+    opt = Optimizer(
+        dimensions=[(-2.0, 2.0)], n_initial_points=0, random_state=random_state
+    )
+    opt.tell(
+        [[-2.0], [-1.0], [0.0], [1.0], [2.0]], [2.0, 0.0, -2.0, 0.0, 2.0], gp_burnin=10
+    )
+    prob = opt.probability_of_optimality(threshold=1.0, n_random_starts=20, random_state=random_state)
+    np.testing.assert_almost_equal(prob, 0.995)
+
+    prob = opt.probability_of_optimality(threshold=[0.9, 0.5], n_random_starts=20, random_state=random_state)
+    np.testing.assert_almost_equal(prob, [0.925, 0.765])

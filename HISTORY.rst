@@ -2,6 +2,12 @@
 History
 =======
 
+0.5.0 (2020-05-21)
+------------------
+
+* Add ``Optimizer.probability_of_optimality`` which estimates the probability that the current global optimum is
+  optimal within a certain tolerance. This can be used to make stopping rules.
+
 0.4.1 (2020-05-19)
 ------------------
 

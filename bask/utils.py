@@ -68,11 +68,17 @@ def _recursive_priors(kernel, prior_list):
         _recursive_priors(kernel.k1, prior_list)
         _recursive_priors(kernel.k2, prior_list)
     elif hasattr(kernel, "kernels"):  # CompoundKernel
+        # It seems that the skopt kernels are not compatible with the
+        # CompoundKernel. This is therefore not officially supported.
         for k in kernel.kernels:
             _recursive_priors(k, prior_list)
     else:
         name = type(kernel).__name__
         if name in ["ConstantKernel", "WhiteKernel"]:
+            if name == "ConstantKernel" and kernel.constant_value_bounds == "fixed":
+                return
+            if name == "WhiteKernel" and kernel.noise_level_bounds == "fixed":
+                return
             # We use a half-normal prior distribution on the signal variance and
             # noise. The input x is sampled in log-space, which is why the
             # change of variables is necessary.

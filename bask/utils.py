@@ -3,6 +3,8 @@ from scipy.spatial.distance import cdist, euclidean
 from scipy.stats import halfnorm, invgamma
 from skopt.learning.gaussian_process.kernels import Matern, ConstantKernel
 
+from bask.priors import make_roundflat
+
 
 __all__ = [
     "geometric_median",
@@ -83,13 +85,19 @@ def _recursive_priors(kernel, prior_list):
                 - np.log(2.0),
             )
         elif name in ["Matern", "RBF"]:
-            # Here we apply an inverse gamma distribution to any lengthscale
+            # Here we apply a round-flat prior distribution to any lengthscale
             # parameter we find. We assume the input variables are normalized
-            # to lie in [0, 1]. The specific values for a and scale were
-            # obtained by fitting the 1% and 99% quantile to 0.15 and 0.8.
-            prior_list.append(
-                lambda x: invgamma(a=8.286, scale=2.4605).logpdf(np.exp(x)) + x,
+            # to lie in [0, 1].
+            # For common optimization problems, we expect the lengthscales to
+            # lie in the range [0.1, 0.6]. The round-flat prior allows values
+            # outside the range, if supported by enough datapoints.
+            roundflat = make_roundflat(
+                lower_bound=0.1,
+                upper_bound=0.6,
+                lower_steepness=2.0,
+                upper_steepness=8.0,
             )
+            prior_list.append(lambda x: roundflat(np.exp(x)) + x)
         else:
             raise NotImplementedError(
                 f"Unable to guess priors for this kernel: {kernel}."

@@ -1,15 +1,10 @@
 from numpy.testing import assert_almost_equal
-from sklearn.gaussian_process.kernels import CompoundKernel
 from skopt.learning.gaussian_process.kernels import (
-    ExpSineSquared,
-    Matern,
     ConstantKernel,
-    WhiteKernel,
     Exponentiation,
-    DotProduct,
-    Product,
-    RationalQuadratic,
+    Matern,
     RBF,
+    WhiteKernel,
 )
 from bask.utils import guess_priors, construct_default_kernel
 
@@ -25,7 +20,7 @@ def test_guess_priors():
     kernel = Exponentiation(
         ConstantKernel(constant_value_bounds="fixed") * Matern()
         + WhiteKernel()
-        + CompoundKernel([RBF(), Matern()]),
+        + RBF(length_scale=(1.0, 1.0)),
         2.0,
     )
 
@@ -33,10 +28,10 @@ def test_guess_priors():
 
     assert len(priors) == 4
     expected = [
-        -1.737085713764618,
-        -4.107091211892862,
-        -1.737085713764618,
-        -1.737085713764618,
+        -0.02116327824572739,
+        -2.112906921232193,
+        -0.02116327824572739,
+        -0.02116327824572739,
     ]
     for p, v in zip(priors, expected):
-        assert_almost_equal(p(0.0), v)
+        assert_almost_equal(p(-0.9), v)

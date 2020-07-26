@@ -62,6 +62,12 @@ class Optimizer(object):
         Dict of arguments passed to :class:`BayesGPR`.  For example,
         ``{'normalize_y': True}`` would allow the GP to normalize the output
         values before fitting.
+    gp_priors : list of callables, optional
+        List of prior distributions for the kernel hyperparameters of the GP.
+        Each callable returns the logpdf of the prior distribution.
+        Remember that a WhiteKernel is added to the ``gp_kernel``, which is why
+        you need to include a prior distribution for that as well.
+        If None, will try to guess suitable prior distributions.
     acq_func : string or Acquisition object, default="pvrs"
         Acquisition function to use as a criterion to select new points to test.
         By default we use "pvrs", which is a very robust criterion with fast

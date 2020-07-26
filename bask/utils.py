@@ -1,7 +1,10 @@
+import collections
 import numpy as np
 from scipy.spatial.distance import cdist, euclidean
 from scipy.stats import halfnorm, invgamma
 from skopt.learning.gaussian_process.kernels import Matern, ConstantKernel
+
+from bask.priors import make_roundflat
 
 
 __all__ = [
@@ -66,11 +69,17 @@ def _recursive_priors(kernel, prior_list):
         _recursive_priors(kernel.k1, prior_list)
         _recursive_priors(kernel.k2, prior_list)
     elif hasattr(kernel, "kernels"):  # CompoundKernel
+        # It seems that the skopt kernels are not compatible with the
+        # CompoundKernel. This is therefore not officially supported.
         for k in kernel.kernels:
             _recursive_priors(k, prior_list)
     else:
         name = type(kernel).__name__
         if name in ["ConstantKernel", "WhiteKernel"]:
+            if name == "ConstantKernel" and kernel.constant_value_bounds == "fixed":
+                return
+            if name == "WhiteKernel" and kernel.noise_level_bounds == "fixed":
+                return
             # We use a half-normal prior distribution on the signal variance and
             # noise. The input x is sampled in log-space, which is why the
             # change of variables is necessary.
@@ -83,13 +92,24 @@ def _recursive_priors(kernel, prior_list):
                 - np.log(2.0),
             )
         elif name in ["Matern", "RBF"]:
-            # Here we apply an inverse gamma distribution to any lengthscale
+            # Here we apply a round-flat prior distribution to any lengthscale
             # parameter we find. We assume the input variables are normalized
-            # to lie in [0, 1]. The specific values for a and scale were
-            # obtained by fitting the 1% and 99% quantile to 0.15 and 0.8.
-            prior_list.append(
-                lambda x: invgamma(a=8.286, scale=2.4605).logpdf(np.exp(x)) + x,
+            # to lie in [0, 1].
+            # For common optimization problems, we expect the lengthscales to
+            # lie in the range [0.1, 0.6]. The round-flat prior allows values
+            # outside the range, if supported by enough datapoints.
+            if isinstance(kernel.length_scale, (collections.Sequence, np.ndarray)):
+                n_priors = len(kernel.length_scale)
+            else:
+                n_priors = 1
+            roundflat = make_roundflat(
+                lower_bound=0.1,
+                upper_bound=0.6,
+                lower_steepness=2.0,
+                upper_steepness=8.0,
             )
+            for _ in range(n_priors):
+                prior_list.append(lambda x: roundflat(np.exp(x)) + x)
         else:
             raise NotImplementedError(
                 f"Unable to guess priors for this kernel: {kernel}."
@@ -128,9 +148,8 @@ def guess_priors(kernel):
     adds suitable priors each encountered hyperparameter.
 
     Here we use a half-Normal(0, 2.0) prior for all ConstantKernels and
-    WhiteKernels, and an invGamma(a=8.286, scale=2.4605) prior for all
-    lengthscales. Change of variables is applied, since inference is done in
-    log-space.
+    WhiteKernels, and an round-flat(0.1, 0.6) prior for all lengthscales.
+    Change of variables is applied, since inference is done in log-space.
 
     Parameters
     ----------

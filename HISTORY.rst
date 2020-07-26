@@ -2,6 +2,11 @@
 History
 =======
 
+0.7.0 (2020-07-26)
+------------------
+* Replace the default inverse gamma distribution prior for the lengthscales by the round-flat distribution.
+* Fix ``guess_priors`` to correctly add kernels with multiple lengthscales.
+
 0.6.0 (2020-05-21)
 ------------------
 

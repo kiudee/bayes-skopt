@@ -1,3 +1,4 @@
+import collections
 import numpy as np
 from scipy.spatial.distance import cdist, euclidean
 from scipy.stats import halfnorm, invgamma
@@ -97,13 +98,18 @@ def _recursive_priors(kernel, prior_list):
             # For common optimization problems, we expect the lengthscales to
             # lie in the range [0.1, 0.6]. The round-flat prior allows values
             # outside the range, if supported by enough datapoints.
+            if isinstance(kernel.length_scale, (collections.Sequence, np.ndarray)):
+                n_priors = len(kernel.length_scale)
+            else:
+                n_priors = 1
             roundflat = make_roundflat(
                 lower_bound=0.1,
                 upper_bound=0.6,
                 lower_steepness=2.0,
                 upper_steepness=8.0,
             )
-            prior_list.append(lambda x: roundflat(np.exp(x)) + x)
+            for _ in range(n_priors):
+                prior_list.append(lambda x: roundflat(np.exp(x)) + x)
         else:
             raise NotImplementedError(
                 f"Unable to guess priors for this kernel: {kernel}."
@@ -142,9 +148,8 @@ def guess_priors(kernel):
     adds suitable priors each encountered hyperparameter.
 
     Here we use a half-Normal(0, 2.0) prior for all ConstantKernels and
-    WhiteKernels, and an invGamma(a=8.286, scale=2.4605) prior for all
-    lengthscales. Change of variables is applied, since inference is done in
-    log-space.
+    WhiteKernels, and an round-flat(0.1, 0.6) prior for all lengthscales.
+    Change of variables is applied, since inference is done in log-space.
 
     Parameters
     ----------

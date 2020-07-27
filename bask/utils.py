@@ -136,7 +136,7 @@ def construct_default_kernel(dimensions):
     kernel = ConstantKernel(
         constant_value=1.0, constant_value_bounds=(0.1, 2.0)
     ) * Matern(
-        length_scale=[0.3] * n_parameters, length_scale_bounds=(0.05, 1.0), nu=2.5
+        length_scale=[0.3] * n_parameters, length_scale_bounds=(0.2, 0.5), nu=2.5
     )
     return kernel
 

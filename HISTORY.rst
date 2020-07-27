@@ -2,6 +2,11 @@
 History
 =======
 
+0.7.1 (2020-07-28)
+------------------
+* Restrict length scale bounds of the default kernel to a tighter interval.
+  This should help start the MCMC walkers in a region with higher likelihood.
+
 0.7.0 (2020-07-26)
 ------------------
 * Replace the default inverse gamma distribution prior for the lengthscales by the round-flat distribution.

@@ -98,4 +98,4 @@ def test_expected_optimality_gap(random_state):
         n_random_starts=10,
         tol=0.1,
     )
-    np.testing.assert_almost_equal(gap, 0.307, decimal=2)
+    np.testing.assert_almost_equal(gap, 0.257190451704128, decimal=2)

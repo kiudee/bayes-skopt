@@ -12,7 +12,7 @@ from skopt.utils import (
 
 from . import acquisition
 from .bayesgpr import BayesGPR
-from .utils import r2_sequence, guess_priors, construct_default_kernel
+from .utils import r2_sequence, construct_default_kernel
 from bask.acquisition import evaluate_acquisitions
 
 __all__ = ["Optimizer"]
@@ -158,12 +158,6 @@ class Optimizer(object):
             random_state=self.rng.randint(0, np.iinfo(np.int32).max),
             **gp_kwargs,
         )
-        # We are only able to guess priors now, since BayesGPR can add
-        # another WhiteKernel, when noise is set to "gaussian":
-        if gp_priors is None:
-            gp_priors = guess_priors(self.gp.kernel)
-        elif len(gp_priors) != self.space.transformed_n_dims + 2:
-            raise ValueError("The number of priors does not match the number of dimensions + 2.")
         self.gp_priors = gp_priors
 
         self.Xi = []
@@ -241,6 +235,13 @@ class Optimizer(object):
             )
 
         if fit and self._n_initial_points <= 0:
+            if (
+                self.gp_priors is not None
+                and len(self.gp_priors) != self.space.transformed_n_dims + 2
+            ):
+                raise ValueError(
+                    "The number of priors does not match the number of dimensions + 2."
+                )
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 if self.gp.pos_ is None or replace:

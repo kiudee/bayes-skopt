@@ -2,6 +2,11 @@
 History
 =======
 
+Unreleased
+----------
+* Fix ``guess_priors`` not correctly adding the prior for the ``WhiteKernel``.
+  It is now called directly in ``BayesGPR.sample``.
+
 0.7.1 (2020-07-28)
 ------------------
 * Restrict length scale bounds of the default kernel to a tighter interval.

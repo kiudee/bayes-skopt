@@ -2,8 +2,8 @@
 History
 =======
 
-Unreleased
-----------
+0.7.2 (2020-08-01)
+------------------
 * Fix ``guess_priors`` not correctly adding the prior for the ``WhiteKernel``.
   It is now called directly in ``BayesGPR.sample``.
 

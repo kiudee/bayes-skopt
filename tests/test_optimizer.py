@@ -61,8 +61,9 @@ def test_no_error_on_unknown_kwargs():
 
 
 def test_error_on_invalid_priors():
+    opt = Optimizer(dimensions=[(-2.0, 2.0)], gp_priors=[], n_initial_points=0)
     with pytest.raises(ValueError):
-        Optimizer(dimensions=[(-2.0, 2.0)], gp_priors=[])
+        opt.tell([(0.0,)], 0.0)
 
 
 def test_probability_of_improvement(random_state):

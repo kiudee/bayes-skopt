@@ -8,7 +8,7 @@ from skopt.learning import GaussianProcessRegressor
 from skopt.learning.gaussian_process.kernels import WhiteKernel
 from skopt.learning.gaussian_process.gpr import _param_for_white_kernel_in_Sum
 
-from .utils import geometric_median
+from .utils import geometric_median, guess_priors
 
 
 __all__ = ["BayesGPR"]
@@ -223,6 +223,7 @@ class BayesGPR(GaussianProcessRegressor):
         **kwargs
     ):
         """ Sample from the posterior distribution of the hyper-parameters."""
+
         def log_prob_fn(x, gp=self):
             lp = 0
             if isinstance(priors, Iterable):
@@ -238,13 +239,17 @@ class BayesGPR(GaussianProcessRegressor):
                 return -np.inf
             return lp
 
-        if X is None and not hasattr(self, "X_train_"):
+        if X is None and not hasattr(self, "X_train_") or self.kernel_ is None:
             raise ValueError(
                 """
                 It looks like you are trying to sample from the GP posterior without data. Pass X and y, or ensure that
                 you call fit before sample.
                 """
             )
+        # We are only able to guess priors now, since BayesGPR can add
+        # another WhiteKernel, when noise is set to "gaussian":
+        if priors is None:
+            priors = guess_priors(self.kernel_)
 
         # Update data, if available:
         if X is not None:
@@ -318,6 +323,7 @@ class BayesGPR(GaussianProcessRegressor):
         self.kernel = self._kernel
         self._apply_noise_vector(len(y), noise_vector)
         super().fit(X, y)
+
         self.sample(
             n_threads=n_threads,
             n_desired_samples=n_desired_samples,

@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "bask"
+version = "0.7.2"
+description = "A fully Bayesian implementation of sequential model-based optimization"
+authors = ["Karlson Pfannschmidt <kiudee@mail.upb.de>"]
+license = "Apache-2.0"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development"
+]
+readme = "README.rst"
+repository = "https://github.com/kiudee/bayes-skopt"
+keywords = ["optimization", "bayesian", "hyperparameters", "robust"]
+documentation = "https://bayes-skopt.readthedocs.io"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Click = "^7.1.2"
+scikit-optimize = "^0.7.4"
+numpy = "^1.19.1"
+scipy = "^1.5.2"
+scikit-learn = "~0.22"
+matplotlib = "^3.3.0"
+emcee = "^3.0.2"
+tqdm = "^4.48.2"
+
+[tool.poetry.dev-dependencies]
+pip = "^20.2.1"
+bump2version = "^1.0.0"
+wheel = "^0.34.2"
+watchdog = "^0.10.3"
+flake8 = "^3.8.3"
+tox = "^3.18.1"
+coverage = "^5.2.1"
+Sphinx = "^3.1.2"
+nbsphinx = "^0.7.1"
+nbsphinx-link = "^1.3.0"
+numpydoc = "^1.1.0"
+ipython = "^7.17.0"
+twine = "^3.2.0"
+Click = "^7.1.2"
+pytest = "^6.0.1"
+pytest-runner = "^5.2"
+
+[tool.poetry.scripts]
+tune = "bask.cli:main"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/kiudee/bayes-skopt/issues"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

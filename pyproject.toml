@@ -27,6 +27,7 @@ scikit-learn = "~0.22"
 matplotlib = "^3.3.0"
 emcee = "^3.0.2"
 tqdm = "^4.48.2"
+Sphinx = {version = "^3.1.2", optional = true}
 
 [tool.poetry.dev-dependencies]
 pip = "^20.2.1"
@@ -45,6 +46,9 @@ twine = "^3.2.0"
 Click = "^7.1.2"
 pytest = "^6.0.1"
 pytest-runner = "^5.2"
+
+[tool.poetry.extras]
+docs = ["Sphinx"]
 
 [tool.poetry.scripts]
 tune = "bask.cli:main"

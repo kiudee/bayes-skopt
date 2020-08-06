@@ -2,6 +2,11 @@
 History
 =======
 
+0.8.0-beta.0 (2020-08-06)
+-------------------------
+* Add ``utils.optimum_intervals`` which for a given ``Optimizer`` instance
+  computes the highest density intervals for the optimum.
+
 0.7.2 (2020-08-01)
 ------------------
 * Fix ``guess_priors`` not correctly adding the prior for the ``WhiteKernel``.

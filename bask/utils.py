@@ -1,13 +1,12 @@
 import collections
 
-from arviz import hdi
 import numpy as np
+from arviz import hdi
 from scipy.spatial.distance import cdist, euclidean
-from scipy.stats import halfnorm, invgamma
-from skopt.learning.gaussian_process.kernels import Matern, ConstantKernel
+from scipy.stats import halfnorm
+from skopt.learning.gaussian_process.kernels import ConstantKernel, Matern
 
 from bask.priors import make_roundflat
-
 
 __all__ = [
     "optimum_intervals",
@@ -246,7 +245,7 @@ def phi(d, n_iter=10):
     elif d == 2:
         return 1.32471795724474602596090885447809
     x = 2.0000
-    for i in range(n_iter):
+    for _ in range(n_iter):
         x = pow(1 + x, 1 / (d + 1))
     return x
 
@@ -305,6 +304,6 @@ def get_progress_bar(display, total):
         total (int): The total size of the progress bar.
     """
     if display is True:
-        return tqdm.tqdm(total=total)
+        return tqdm.tqdm(total=total)  # noqa: F821
     else:
         return _NoOpPBar()

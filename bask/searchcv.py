@@ -4,10 +4,7 @@ import numpy as np
 from scipy.stats import rankdata
 from sklearn.utils.validation import check_is_fitted
 from skopt import BayesSearchCV as BayesSearchCVSK
-from skopt.utils import create_result
-from skopt.utils import dimensions_aslist
-from skopt.utils import expected_minimum
-from skopt.utils import point_asdict
+from skopt.utils import create_result, dimensions_aslist, expected_minimum, point_asdict
 
 from bask.optimizer import Optimizer
 
@@ -328,13 +325,14 @@ class BayesSearchCV(BayesSearchCVSK):
         if self.return_policy == "best_setting" or len(self.optimizers_) > 1:
             if len(self.optimizers_) > 1:
                 logging.warning(
-                    "Return policy 'best_mean' is incompatible with multiple search spaces."
-                    " Reverting to 'best_setting'."
+                    "Return policy 'best_mean' is incompatible with multiple search"
+                    "spaces. Reverting to 'best_setting'."
                 )
             return self.cv_results_["params"][self.best_index_]
         if self.return_policy == "best_mean":
             random_state = self.optimizer_kwargs_["random_state"]
-            # We construct a result object manually here, since in skopt versions up to 0.7.4 they were not saved yet:
+            # We construct a result object manually here, since in skopt versions up to
+            # 0.7.4 they were not saved yet:
             opt = self.optimizers_[0]
             result_object = create_result(
                 opt.Xi, opt.yi, space=opt.space, rng=random_state, models=[opt.gp]

@@ -1,14 +1,15 @@
 import numpy as np
 from numpy.testing import assert_almost_equal
 from skopt.learning.gaussian_process.kernels import (
+    RBF,
     ConstantKernel,
     Exponentiation,
     Matern,
-    RBF,
     WhiteKernel,
 )
+
 from bask.optimizer import Optimizer
-from bask.utils import guess_priors, construct_default_kernel, optimum_intervals
+from bask.utils import construct_default_kernel, guess_priors, optimum_intervals
 
 
 def test_optimum_intervals():

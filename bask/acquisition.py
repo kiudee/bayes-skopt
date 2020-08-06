@@ -1,13 +1,12 @@
 from abc import ABC, abstractmethod
+
 import numpy as np
 import scipy.stats as st
-from scipy.linalg import cholesky, cho_solve
+from scipy.linalg import cho_solve, cholesky
 from scipy.optimize import bisect
 from sklearn.utils import check_random_state
 
-
 from bask.utils import get_progress_bar
-
 
 __all__ = [
     "evaluate_acquisitions",

@@ -244,7 +244,51 @@ class BayesGPR(GaussianProcessRegressor):
         add=False,
         **kwargs
     ):
-        """ Sample from the posterior distribution of the hyper-parameters."""
+        """Sample from the posterior distribution of the hyper-parameters.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims), optional (default: None)
+            Points at which the function is evaluated. If None, it will use the saved
+            datapoints.
+        y : ndarray, shape (n_points,), optional (default: None)
+            Value(s) of the function at `X`. If None, it will use the saved values.
+        noise_vector :
+            Variance(s) of the function at `X`. If None, no additional noise is applied.
+        n_threads : int, optional (default: 1)
+            Number of threads to use during inference.
+            This is currently not implemented.
+        n_desired_samples : int, optional (default: 100)
+            Number of hyperposterior samples to collect during inference. Must be a
+            multiple of `n_walkers_per_thread`.
+        n_burnin : int, optional (default: 0)
+            Number of iterations to discard before collecting hyperposterior samples.
+            Needs to be increased only, if the hyperposterior samples have not reached
+            their typical set yet. Higher values increase the running time.
+        n_thin : int, optional (default: 1)
+            Only collect hyperposterior samples every k-th iteration. This can help
+            reducing the autocorrelation of the collected samples, but reduces the
+            total number of samples.
+        n_walkers_per_thread : int, optional (default: 100)
+            Number of MCMC ensemble walkers to employ during inference.
+        progress : bool, optional (default: False)
+            If True, show a progress bar during inference.
+        priors : list or callable, optional (default: None)
+            Log prior(s) for the kernel hyperparameters. Remember that the kernel
+            hyperparameters are transformed into log space. Thus your priors need to
+            perform the necessary change-of-variables.
+        position : ndarray, shape (n_walkers, n_kernel_dims), optional (default: None)
+            Starting position of the Markov chain. If None, it will use the current
+            position. If this is None as well, it will try to initialize in a small
+            ball.
+        add : bool, optional (default: False)
+            If True, all collected hyperposterior samples will be added to the existing
+            samples in `BayesGPR.chain_`. Otherwise they will be replaced.
+        kwargs : dict
+            Additional keyword arguments for emcee.EnsembleSampler
+
+        """
+
 
         def log_prob_fn(x, gp=self):
             lp = 0

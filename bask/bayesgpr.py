@@ -203,6 +203,11 @@ class BayesGPR(GaussianProcessRegressor):
 
     @contextmanager
     def noise_set_to_zero(self):
+        """Context manager in which the noise of the Gaussian process is 0.
+
+        This is useful when you want to predict the epistemic uncertainty of the
+        Gaussian process without the noise.
+        """
         current_theta = self.theta
         try:
             # Now we set the noise to 0, but do NOT recalculate the alphas!:

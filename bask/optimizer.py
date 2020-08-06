@@ -215,7 +215,7 @@ class Optimizer(object):
                 noise_vector = [0.0] * len(y)
             elif not is_listlike(noise_vector) or len(noise_vector) != len(y):
                 raise ValueError(
-                    f"Vector of noise variances needs to be of equal length as `y`."
+                    "Vector of noise variances needs to be of equal length as `y`."
                 )
             self.noisei.extend(noise_vector)
             self._n_initial_points -= len(y)
@@ -226,7 +226,8 @@ class Optimizer(object):
                 noise_vector = 0.0
             elif is_listlike(noise_vector):
                 raise ValueError(
-                    f"Vector of noise variances is a list, while tell only received one datapoint."
+                    "Vector of noise variances is a list, while tell only received one"
+                    "datapoint."
                 )
             self.noisei.append(noise_vector)
             self._n_initial_points -= 1
@@ -302,24 +303,27 @@ class Optimizer(object):
         use_mean_gp=True,
         random_state=None,
     ):
-        """ Compute the probability that the current expected optimum cannot be improved by more than ``threshold``
-        points.
+        """ Compute the probability that the current expected optimum cannot be improved
+        by more than ``threshold`` points.
 
         Parameters
         ----------
         threshold : float or list-of-floats
-            Other points have to be better than the current optimum by at least a margin of size ``threshold``.
-            If a list is passed, this will return a list of probabilities.
+            Other points have to be better than the current optimum by at least a margin
+            of size ``threshold``. If a list is passed, this will return a list of
+            probabilities.
         n_space_samples : int, default=500
             Number of random samples used to cover the optimization space.
         n_gp_samples : int, default=200
             Number of functions to sample from the Gaussian process.
         n_random_starts : int, default=100
-            Number of random positions to start the optimizer from in order to determine the global optimum.
+            Number of random positions to start the optimizer from in order to determine
+            the global optimum.
         use_mean_gp : bool, default=True
-            If True, random functions will be sampled from the consensus GP, which is usually faster, but could
-            underestimate the variability. If False, the posterior distribution over hyperparameters is used to sample
-            different GPs and then sample functions.
+            If True, random functions will be sampled from the consensus GP, which is
+            usually faster, but could underestimate the variability. If False, the
+            posterior distribution over hyperparameters is used to sample different GPs
+            and then sample functions.
         random_state : int, RandomState instance, or None (default)
             Set random state to something other than None for reproducible results.
 
@@ -370,7 +374,8 @@ class Optimizer(object):
         use_mean_gp=True,
         random_state=None,
     ):
-        """ Estimate the expected optimality gap by repeatedly sampling functions consistent with the data.
+        """ Estimate the expected optimality gap by repeatedly sampling functions
+        consistent with the data.
 
         Parameters
         ----------
@@ -378,28 +383,30 @@ class Optimizer(object):
             Maximum amount of tries to compute the current global optimum.
             Raises a ValueError, if it fails.
         n_probabilities : int, default=50
-            Number of probabilities to calculate in order to estimate the cumulative distribution function for the
-            optimality gap.
+            Number of probabilities to calculate in order to estimate the cumulative
+            distribution function for the optimality gap.
         n_space_samples : int, default=500
             Number of random samples used to cover the optimization space.
         n_gp_samples : int, default=200
             Number of functions to sample from the Gaussian process.
         n_random_starts : int, default=100
-            Number of random positions to start the optimizer from in order to determine the global optimum.
+            Number of random positions to start the optimizer from in order to determine
+            the global optimum.
         tol : float, default=0.01
             Tolerance with which to determine the upper bound for the optimality gap.
         use_mean_gp : bool, default=True
-            If True, random functions will be sampled from the consensus GP, which is usually faster, but could
-            underestimate the variability. If False, the posterior distribution over hyperparameters is used to sample
-            different GPs and then sample functions.
+            If True, random functions will be sampled from the consensus GP, which is
+            usually faster, but could underestimate the variability. If False, the
+            posterior distribution over hyperparameters is used to sample different GPs
+            and then sample functions.
         random_state : int, RandomState instance, or None (default)
             Set random state to something other than None for reproducible results.
 
         Returns
         -------
         expected_gap : float
-            The expected optimality gap of the current global optimum with respect to randomly sampled,
-             consistent optima.
+            The expected optimality gap of the current global optimum with respect to
+            randomly sampled, consistent optima.
         """
         random_state = check_random_state(random_state)
         seed = random_state.randint(0, 2 ** 32 - 1, dtype=np.int64)

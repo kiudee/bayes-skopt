@@ -15,20 +15,24 @@ __all__ = ["BayesGPR"]
 
 
 class BayesGPR(GaussianProcessRegressor):
-    """ Gaussian process regressor of which the kernel hyperparameters are inferred in a fully Bayesian framework.
+    """ Gaussian process regressor of which the kernel hyperparameters are inferred in a
+    fully Bayesian framework.
 
-    The implementation is based on Algorithm 2.1 of Gaussian Processes for Machine Learning (GPML) by Rasmussen and
-    Williams.
+    The implementation is based on Algorithm 2.1 of Gaussian Processes for Machine
+    Learning (GPML) by Rasmussen and Williams.
 
     In addition to standard scikit-learn estimator API, GaussianProcessRegressor:
        * allows prediction without prior fitting (based on the GP prior);
-       * provides an additional method sample_y(X), which evaluates samples drawn from the GPR (prior or posterior or
-         hyper-posterior) at given inputs;
-       * exposes a method log_marginal_likelihood(theta), which can be used externally for other ways of selecting
-         hyperparameters, e.g., via Markov chain Monte Carlo.
-       * allows setting the kernel hyperparameters while correctly recalculating the required matrices
-       * exposes a method noise_set_to_zero() which can be used as a context manager to temporarily set the prediction
-         noise to zero. This is useful for evaluating acquisition functions for Bayesian optimization
+       * provides an additional method sample_y(X), which evaluates samples drawn from
+         the GPR (prior or posterior or hyper-posterior) at given inputs;
+       * exposes a method log_marginal_likelihood(theta), which can be used externally
+         for other ways of selecting hyperparameters,
+         e.g., via Markov chain Monte Carlo.
+       * allows setting the kernel hyperparameters while correctly recalculating the
+         required matrices
+       * exposes a method noise_set_to_zero() which can be used as a context manager to
+         temporarily set the prediction noise to zero.
+         This is useful for evaluating acquisition functions for Bayesian optimization
 
     Parameters
     ----------
@@ -123,8 +127,9 @@ class BayesGPR(GaussianProcessRegressor):
     chain_ : array-like, shape = (n_desired_samples, n_hyperparameters)
         Samples from the posterior distribution of the hyperparameters.
     pos_ : array-like, shape = (n_walkers, n_hyperparameters)
-        Last position of the Markov chain. Useful for continuing sampling when new datapoints arrive.
-        fit(X, y) internally uses an existing pos_ to resume sampling, if no other position is provided.
+        Last position of the Markov chain. Useful for continuing sampling when new
+        datapoints arrive. fit(X, y) internally uses an existing pos_ to resume
+        sampling, if no other position is provided.
     """
 
     def __init__(
@@ -197,7 +202,8 @@ class BayesGPR(GaussianProcessRegressor):
             self.kernel_.theta = current_theta
 
     def _apply_noise_vector(self, n_instances, noise_vector):
-        # We apply the noise vector to self.alpha here, to avoid having to pull up inherited code:
+        # We apply the noise vector to self.alpha here, to avoid having to pull up
+        # inherited code:
         if noise_vector is not None:
             if not np.iterable(self.alpha):
                 alpha = np.ones(n_instances) * self.alpha
@@ -242,8 +248,8 @@ class BayesGPR(GaussianProcessRegressor):
         if X is None and not hasattr(self, "X_train_") or self.kernel_ is None:
             raise ValueError(
                 """
-                It looks like you are trying to sample from the GP posterior without data. Pass X and y, or ensure that
-                you call fit before sample.
+                It looks like you are trying to sample from the GP posterior without
+                data. Pass X and y, or ensure that you call fit before sample.
                 """
             )
         # We are only able to guess priors now, since BayesGPR can add

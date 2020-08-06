@@ -8,4 +8,21 @@ from .acquisition import *
 from .bayesgpr import BayesGPR
 from .optimizer import Optimizer
 from .searchcv import BayesSearchCV
-from .utils import construct_default_kernel, geometric_median, guess_priors, r2_sequence
+from .utils import guess_priors, optimum_intervals
+
+__all__ = [
+    "BayesGPR",
+    "Optimizer",
+    "BayesSearchCV",
+    "optimum_intervals",
+    "guess_priors",
+    "evaluate_acquisitions",
+    "ExpectedImprovement",
+    "TopTwoEI",
+    "Expectation",
+    "LCB",
+    "MaxValueSearch",
+    "ThompsonSampling",
+    "VarianceReduction",
+    "PVRS",
+]

@@ -58,7 +58,7 @@ def test_noise_vector():
 
 
 def test_no_error_on_unknown_kwargs():
-    opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5, unknown_argument=42)
+    Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5, unknown_argument=42)
 
 
 def test_error_on_invalid_priors():

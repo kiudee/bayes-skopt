@@ -48,5 +48,8 @@ def make_roundflat(
     value = quad(
         lambda x: np.exp(roundflat(x)), integration_bounds[0], integration_bounds[1]
     )[0]
-    prior = lambda x: roundflat(x) - np.log(value)
+
+    def prior(x):
+        return roundflat(x) - np.log(value)
+
     return prior

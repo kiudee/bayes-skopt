@@ -166,6 +166,17 @@ class BayesGPR(GaussianProcessRegressor):
 
     @property
     def theta(self):
+        """The current geometric median of the kernel hyperparameter distribution.
+
+        The returned values are located in log space. Call `BayesGPR.kernel_` to obtain
+        the values their original space.
+
+        Returns
+        -------
+        ndarray
+            Array containing the kernel hyperparameters in log space.
+
+        """
         if self.kernel_ is not None:
             with np.errstate(divide="ignore"):
                 return np.copy(self.kernel_.theta)

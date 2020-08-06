@@ -10,6 +10,7 @@ from bask.priors import make_roundflat
 
 
 __all__ = [
+    "optimum_intervals",
     "geometric_median",
     "r2_sequence",
     "guess_priors",
@@ -28,14 +29,27 @@ def optimum_intervals(
 ):
     """Estimate highest density intervals for the optimum.
 
+    Employs Thompson sampling to obtain samples from the optimum distribution.
+    For each dimension separately, it will then estimate highest density
+    intervals.
+
     Parameters
     ----------
     optimizer : bask.Optimizer object
+        The optimizer instance for which the highest density intervals are to
+        be computed.
     hdi_prob : float, default=0.95
+        The total probability each interval should cover.
     multimodal : bool, default=True
+        If True, more than one interval can be returned for one parameter.
     opt_samples : int, default=200
+        Number of samples to generate from the optimum distribution.
     space_samples : int, default=500
+        Number of samples to cover the optimization space with.
     only_mean : bool, default=True
+        If True, it will only sample optima from the mean Gaussian process.
+        This is usually faster, but can underestimate the uncertainty.
+        If False, it will also sample the hyperposterior of the kernel parameters.
     random_state : int, RandomState instance or None, optional (default: None)
         The generator used to initialize the centers. If int, random_state is
         the seed used by the random number generator; If RandomState instance,
@@ -53,7 +67,6 @@ def optimum_intervals(
     NotImplementedError
         If the user calls the function with an optimizer containing at least one
         categorical parameter.
-
     """
     if optimizer.space.is_partly_categorical:
         raise NotImplementedError(

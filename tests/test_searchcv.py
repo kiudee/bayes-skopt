@@ -1,9 +1,7 @@
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
-from skopt.space import Categorical
-from skopt.space import Integer
-from skopt.space import Real
+from skopt.space import Categorical, Integer, Real
 
 from bask.searchcv import BayesSearchCV
 

@@ -1,5 +1,6 @@
 """Console script for bask."""
 import sys
+
 import click
 
 

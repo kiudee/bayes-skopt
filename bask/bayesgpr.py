@@ -1,15 +1,15 @@
-import emcee as mc
-import numpy as np
 from collections.abc import Iterable
 from contextlib import contextmanager, nullcontext
-from scipy.linalg import cholesky, cho_solve, solve_triangular
+
+import emcee as mc
+import numpy as np
+from scipy.linalg import cho_solve, cholesky, solve_triangular
 from sklearn.utils import check_random_state
 from skopt.learning import GaussianProcessRegressor
-from skopt.learning.gaussian_process.kernels import WhiteKernel
 from skopt.learning.gaussian_process.gpr import _param_for_white_kernel_in_Sum
+from skopt.learning.gaussian_process.kernels import WhiteKernel
 
 from .utils import geometric_median, guess_priors
-
 
 __all__ = ["BayesGPR"]
 

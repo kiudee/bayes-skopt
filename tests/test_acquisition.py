@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
 from scipy.stats import halfnorm, invgamma
-from skopt.learning.gaussian_process.kernels import ConstantKernel, RBF
-from bask.acquisition import evaluate_acquisitions, PVRS, VarianceReduction
+from skopt.learning.gaussian_process.kernels import RBF, ConstantKernel
+
+from bask.acquisition import PVRS, VarianceReduction, evaluate_acquisitions
 from bask.bayesgpr import BayesGPR
 
 

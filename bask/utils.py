@@ -1,13 +1,12 @@
 import collections
 
-from arviz import hdi
 import numpy as np
+from arviz import hdi
 from scipy.spatial.distance import cdist, euclidean
-from scipy.stats import halfnorm, invgamma
-from skopt.learning.gaussian_process.kernels import Matern, ConstantKernel
+from scipy.stats import halfnorm
+from skopt.learning.gaussian_process.kernels import ConstantKernel, Matern
 
 from bask.priors import make_roundflat
-
 
 __all__ = [
     "optimum_intervals",

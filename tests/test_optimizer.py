@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
-from bask.optimizer import Optimizer
 from sklearn.utils.testing import assert_equal
 from skopt.benchmarks import bench1
+
+from bask.optimizer import Optimizer
 
 
 @pytest.fixture

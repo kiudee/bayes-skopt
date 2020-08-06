@@ -3,7 +3,6 @@
 """Tests for `bask` package."""
 
 import pytest
-
 from click.testing import CliRunner
 
 from bask import cli

@@ -7,5 +7,5 @@ __version__ = "0.8.0-beta.0"
 from .acquisition import *
 from .bayesgpr import BayesGPR
 from .optimizer import Optimizer
-from .utils import geometric_median, guess_priors, construct_default_kernel, r2_sequence
 from .searchcv import BayesSearchCV
+from .utils import construct_default_kernel, geometric_median, guess_priors, r2_sequence

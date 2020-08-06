@@ -1,19 +1,21 @@
 import warnings
+
 import numpy as np
 from scipy.optimize import minimize_scalar
 from sklearn.utils import check_random_state
 from skopt.utils import (
     create_result,
-    normalize_dimensions,
-    is_listlike,
-    is_2Dlistlike,
     expected_minimum,
+    is_2Dlistlike,
+    is_listlike,
+    normalize_dimensions,
 )
+
+from bask.acquisition import evaluate_acquisitions
 
 from . import acquisition
 from .bayesgpr import BayesGPR
-from .utils import r2_sequence, construct_default_kernel
-from bask.acquisition import evaluate_acquisitions
+from .utils import construct_default_kernel, r2_sequence
 
 __all__ = ["Optimizer"]
 

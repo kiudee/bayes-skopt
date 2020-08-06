@@ -1,8 +1,9 @@
 import numpy as np
 import pytest
 from scipy.stats import halfnorm, invgamma
+from skopt.learning.gaussian_process.kernels import RBF, ConstantKernel
+
 from bask.bayesgpr import BayesGPR
-from skopt.learning.gaussian_process.kernels import ConstantKernel, RBF
 
 
 @pytest.fixture

@@ -353,17 +353,28 @@ class Optimizer(object):
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
 
     def run(self, func, n_iter=1, n_samples=5, gp_burnin=10):
-        """
+        """Execute the ask/tell-loop on a given objective function.
 
         Parameters
         ----------
-        func :
-        n_iter :
-        n_samples :
-        gp_burnin :
+        func : function
+            The objective function to minimize.
+        n_iter : int, optional (default: 1)
+            Number of iterations to perform.
+        n_samples : int, optional (default: 5)
+            Number of hyperposterior samples over which to average the acquisition
+            function.
+        gp_burnin : int, optional (default: 10)
+            Number of inference iterations to discard before beginning collecting
+            hyperposterior samples. Only needs to be increased, if the hyperposterior
+            after burnin has not settled on the typical set. Drastically increases
+            running time.
 
         Returns
         -------
+        scipy.optimize.OptimizeResult object
+            Contains the points, the values of the objective function, the search space,
+            the random state and the list of models.
 
         """
         for _ in range(n_iter):

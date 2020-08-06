@@ -168,6 +168,29 @@ class Optimizer(object):
         self._next_x = None
 
     def ask(self, n_points=1):
+        """Ask the optimizer for the next point to evaluate.
+
+        If the optimizer is still in its initialization phase, it will return a point
+        as specified by the init_strategy.
+        If the Gaussian process has been fit, a previously computed point as
+
+        Parameters
+        ----------
+        n_points : int
+            Number of points to return. This is currently not implemented and will raise
+            a NotImplementedError.
+
+        Returns
+        -------
+        list
+            A list with the same dimensionality as the optimization space.
+
+        Raises
+        ------
+        NotImplementedError
+            If n_points is != 1, which is not implemented yet.
+
+        """
         if n_points > 1:
             raise NotImplementedError(
                 "Returning multiple points is not implemented yet."

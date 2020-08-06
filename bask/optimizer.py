@@ -220,12 +220,54 @@ class Optimizer(object):
         gp_burnin=10,
         progress=False,
     ):
-        # if y isn't a scalar it means we have been handed a batch of points
+        """Inform the optimizer about the objective function at discrete points.
 
-        # TODO (noise vector):
-        #  1. Replace case should be easy
-        #  2. Add case should add noise values to list
-        #  -> What if noise_vector is None? (have to set noise to 0)
+        Provide values of the objective function at points suggested by `ask()` or other
+        points. By default a new model will be fit to all observations.
+        The new model is used to suggest the next point at which to evaluate the
+        objective. This point can be retrieved by calling `ask()`.
+        To add observations without fitting a new model set `fit` to False.
+        To add multiple observations in a batch pass a list-of-lists for `x`
+        and a list of scalars for `y`.
+
+        Parameters
+        ----------
+        x : list or list of lists
+            Point(s) at which the objective function was evaluated.
+        y : scalar or list
+            Value(s) of the objective function at `x`.
+        noise_vector : list, default=None
+            Variance(s) of the objective function at `x`.
+        fit : bool, optional (default: True)
+            If True, a model will be fitted to the points, if `n_initial_points` points
+            have been evaluated.
+        replace : bool, optional (default: False)
+            If True, the existing data points will be replaced with the one given in
+            `x` and `y`.
+        n_samples : int, optional (default: 0)
+            Number of hyperposterior samples over which to average the acquisition
+            function. More samples make the acquisition function more robust, but
+            increase the running time.
+            Can be set to 0 for `pvrs` and `vr`.
+        gp_samples : int, optional (default: 100)
+            Number of hyperposterior samples to collect during inference. More samples
+            result in a more accurate representation of the hyperposterior, but
+            increase the running time.
+            Has to be a multiple of 100.
+        gp_burnin : int, optional (default: 10)
+            Number of inference iterations to discard before beginning collecting
+            hyperposterior samples. Only needs to be increased, if the hyperposterior
+            after burnin has not settled on the typical set. Drastically increases
+            running time.
+        progress : bool, optional (default: False)
+            If True, show a progress bar during the inference phase.
+
+        Returns
+        -------
+        scipy.optimize.OptimizeResult object
+            Contains the points, the values of the objective function, the search space,
+            the random state and the list of models.
+        """
         if replace:
             self.Xi = []
             self.yi = []
@@ -311,6 +353,19 @@ class Optimizer(object):
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
 
     def run(self, func, n_iter=1, n_samples=5, gp_burnin=10):
+        """
+
+        Parameters
+        ----------
+        func :
+        n_iter :
+        n_samples :
+        gp_burnin :
+
+        Returns
+        -------
+
+        """
         for _ in range(n_iter):
             x = self.ask()
             self.tell(x, func(x), n_samples=n_samples, gp_burnin=gp_burnin)

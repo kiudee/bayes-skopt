@@ -8,13 +8,12 @@ from .acquisition import *
 from .bayesgpr import BayesGPR
 from .optimizer import Optimizer
 from .searchcv import BayesSearchCV
-from .utils import guess_priors, optimum_intervals
+from .utils import guess_priors
 
 __all__ = [
     "BayesGPR",
     "Optimizer",
     "BayesSearchCV",
-    "optimum_intervals",
     "guess_priors",
     "evaluate_acquisitions",
     "ExpectedImprovement",

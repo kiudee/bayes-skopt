@@ -1,4 +1,3 @@
-import numpy as np
 from numpy.testing import assert_almost_equal
 from skopt.learning.gaussian_process.kernels import (
     RBF,
@@ -8,27 +7,7 @@ from skopt.learning.gaussian_process.kernels import (
     WhiteKernel,
 )
 
-from bask.optimizer import Optimizer
-from bask.utils import construct_default_kernel, guess_priors, optimum_intervals
-
-
-def test_optimum_intervals():
-    opt = Optimizer(
-        dimensions=[(0.0, 1.0)], random_state=0, acq_func="mean", n_points=1
-    )
-    x = np.linspace(0, 1, num=30)[:, None]
-    y = np.cos(np.pi * 4 * x).flatten()
-    opt.tell(x.tolist(), y.tolist(), gp_burnin=0, progress=False, n_samples=0)
-
-    intervals = optimum_intervals(opt, random_state=0, space_samples=100)
-    assert len(intervals) == 1
-    assert len(intervals[0]) == 2
-    assert len(intervals[0][0]) == 2
-    intervals = optimum_intervals(
-        opt, random_state=0, space_samples=100, multimodal=False
-    )
-    assert len(intervals) == 1
-    assert len(intervals[0]) == 2
+from bask.utils import construct_default_kernel, guess_priors
 
 
 def test_construct_default_kernel():

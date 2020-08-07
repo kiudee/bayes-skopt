@@ -101,3 +101,22 @@ def test_expected_optimality_gap(random_state):
         tol=0.1,
     )
     np.testing.assert_almost_equal(gap, 0.257190451704128, decimal=2)
+
+
+def test_optimum_intervals():
+    opt = Optimizer(
+        dimensions=[(0.0, 1.0)], random_state=0, acq_func="mean", n_points=1
+    )
+    x = np.linspace(0, 1, num=30)[:, None]
+    y = np.cos(np.pi * 4 * x).flatten()
+    opt.tell(x.tolist(), y.tolist(), gp_burnin=0, progress=False, n_samples=0)
+
+    intervals = opt.optimum_intervals(random_state=0, space_samples=100)
+    assert len(intervals) == 1
+    assert len(intervals[0]) == 2
+    assert len(intervals[0][0]) == 2
+    intervals = opt.optimum_intervals(
+        random_state=0, space_samples=100, multimodal=False
+    )
+    assert len(intervals) == 1
+    assert len(intervals[0]) == 2

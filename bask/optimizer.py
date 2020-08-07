@@ -1,6 +1,7 @@
 import warnings
 
 import numpy as np
+from arviz import hdi
 from scipy.optimize import minimize_scalar
 from sklearn.utils import check_random_state
 from skopt.utils import (
@@ -537,3 +538,67 @@ class Optimizer(object):
             p = probabilities[i + 1] - probabilities[i]
             expected_gap += p * thresholds[i + 1]
         return expected_gap
+
+    def optimum_intervals(
+        self,
+        hdi_prob=0.95,
+        multimodal=True,
+        opt_samples=200,
+        space_samples=500,
+        only_mean=True,
+        random_state=None,
+    ):
+        """Estimate highest density intervals for the optimum.
+
+        Employs Thompson sampling to obtain samples from the optimum distribution.
+        For each dimension separately, it will then estimate highest density
+        intervals.
+
+        Parameters
+        ----------
+        hdi_prob : float, default=0.95
+            The total probability each interval should cover.
+        multimodal : bool, default=True
+            If True, more than one interval can be returned for one parameter.
+        opt_samples : int, default=200
+            Number of samples to generate from the optimum distribution.
+        space_samples : int, default=500
+            Number of samples to cover the optimization space with.
+        only_mean : bool, default=True
+            If True, it will only sample optima from the mean Gaussian process.
+            This is usually faster, but can underestimate the uncertainty.
+            If False, it will also sample the hyperposterior of the kernel parameters.
+        random_state : int, RandomState instance or None, optional (default: None)
+            The generator used to initialize the centers. If int, random_state is
+            the seed used by the random number generator; If RandomState instance,
+            random_state is the random number generator; If None, the random number
+            generator is the RandomState instance used by `np.random`.
+
+        Returns
+        -------
+        intervals : list of ndarray
+            Outputs an array of size (n_modes, 2) for each dimension in the
+            optimization space.
+
+        Raises
+        ------
+        NotImplementedError
+            If the user calls the function on an optimizer containing at least one
+            categorical parameter.
+        """
+        if self.space.is_partly_categorical:
+            raise NotImplementedError(
+                "Highest density interval not implemented for categorical parameters."
+            )
+        X = self.space.rvs(n_samples=space_samples, random_state=random_state)
+        X = self.space.transform(X)
+        optimum_samples = self.gp.sample_y(
+            X, sample_mean=only_mean, n_samples=opt_samples, random_state=random_state
+        )
+        X_opt = X[np.argmin(optimum_samples, axis=0)]
+
+        intervals = []
+        for i, col in enumerate(X_opt.T):
+            raw_interval = hdi(col, hdi_prob=hdi_prob, multimodal=multimodal)
+            intervals.append(self.space.dimensions[i].inverse_transform(raw_interval))
+        return intervals

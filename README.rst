@@ -23,10 +23,6 @@ Bayes-skopt
         :target: https://bayes-skopt.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/kiudee/bayes-skopt/shield.svg
-        :target: https://pyup.io/repos/github/kiudee/bayes-skopt/
-        :alt: Updates
-
 A fully Bayesian implementation of sequential model-based optimization
 
 

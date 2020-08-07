@@ -440,6 +440,30 @@ class BayesGPR(GaussianProcessRegressor):
         )
 
     def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
+        """Sample function realizations of the Gaussian process.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims)
+            Points at which to evaluate the functions.
+        sample_mean : bool, optional (default: False)
+            If True, the geometric median of the hyperposterior samples is used as the
+            Gaussian process to sample from. If False, a new set of hyperposterior
+            is used for each new sample.
+        noise : bool, optional (default: False)
+            If True, Gaussian noise is added to the samples.
+        n_samples : int, optional (default: 1)
+            Number of samples to draw from the Gaussian process(es).
+        random_state : int or RandomState or None, optional, default=None
+            Pseudo random number generator state used for random uniform sampling
+            from lists of possible values instead of scipy.stats distributions.
+
+        Returns
+        -------
+        result : ndarray, shape (n_points, n_samples)
+            Samples from the Gaussian process(es)
+
+        """
         rng = check_random_state(random_state)
         if sample_mean:
             if noise:

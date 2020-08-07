@@ -166,6 +166,17 @@ class BayesGPR(GaussianProcessRegressor):
 
     @property
     def theta(self):
+        """The current geometric median of the kernel hyperparameter distribution.
+
+        The returned values are located in log space. Call `BayesGPR.kernel_` to obtain
+        the values their original space.
+
+        Returns
+        -------
+        ndarray
+            Array containing the kernel hyperparameters in log space.
+
+        """
         if self.kernel_ is not None:
             with np.errstate(divide="ignore"):
                 return np.copy(self.kernel_.theta)
@@ -192,6 +203,11 @@ class BayesGPR(GaussianProcessRegressor):
 
     @contextmanager
     def noise_set_to_zero(self):
+        """Context manager in which the noise of the Gaussian process is 0.
+
+        This is useful when you want to predict the epistemic uncertainty of the
+        Gaussian process without the noise.
+        """
         current_theta = self.theta
         try:
             # Now we set the noise to 0, but do NOT recalculate the alphas!:
@@ -228,7 +244,51 @@ class BayesGPR(GaussianProcessRegressor):
         add=False,
         **kwargs
     ):
-        """ Sample from the posterior distribution of the hyper-parameters."""
+        """Sample from the posterior distribution of the hyper-parameters.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims), optional (default: None)
+            Points at which the function is evaluated. If None, it will use the saved
+            datapoints.
+        y : ndarray, shape (n_points,), optional (default: None)
+            Value(s) of the function at `X`. If None, it will use the saved values.
+        noise_vector :
+            Variance(s) of the function at `X`. If None, no additional noise is applied.
+        n_threads : int, optional (default: 1)
+            Number of threads to use during inference.
+            This is currently not implemented.
+        n_desired_samples : int, optional (default: 100)
+            Number of hyperposterior samples to collect during inference. Must be a
+            multiple of `n_walkers_per_thread`.
+        n_burnin : int, optional (default: 0)
+            Number of iterations to discard before collecting hyperposterior samples.
+            Needs to be increased only, if the hyperposterior samples have not reached
+            their typical set yet. Higher values increase the running time.
+        n_thin : int, optional (default: 1)
+            Only collect hyperposterior samples every k-th iteration. This can help
+            reducing the autocorrelation of the collected samples, but reduces the
+            total number of samples.
+        n_walkers_per_thread : int, optional (default: 100)
+            Number of MCMC ensemble walkers to employ during inference.
+        progress : bool, optional (default: False)
+            If True, show a progress bar during inference.
+        priors : list or callable, optional (default: None)
+            Log prior(s) for the kernel hyperparameters. Remember that the kernel
+            hyperparameters are transformed into log space. Thus your priors need to
+            perform the necessary change-of-variables.
+        position : ndarray, shape (n_walkers, n_kernel_dims), optional (default: None)
+            Starting position of the Markov chain. If None, it will use the current
+            position. If this is None as well, it will try to initialize in a small
+            ball.
+        add : bool, optional (default: False)
+            If True, all collected hyperposterior samples will be added to the existing
+            samples in `BayesGPR.chain_`. Otherwise they will be replaced.
+        kwargs : dict
+            Additional keyword arguments for emcee.EnsembleSampler
+
+        """
+
 
         def log_prob_fn(x, gp=self):
             lp = 0
@@ -326,6 +386,43 @@ class BayesGPR(GaussianProcessRegressor):
         position=None,
         **kwargs
     ):
+        """Fit the Gaussian process model to the given training data.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims)
+            Points at which the function is evaluated. If None, it will use the saved
+            datapoints.
+        y : ndarray, shape (n_points,)
+            Value(s) of the function at `X`. If None, it will use the saved values.
+        noise_vector :
+            Variance(s) of the function at `X`. If None, no additional noise is applied.
+        n_threads : int, optional (default: 1)
+            Number of threads to use during inference.
+            This is currently not implemented.
+        n_desired_samples : int, optional (default: 100)
+            Number of hyperposterior samples to collect during inference. Must be a
+            multiple of `n_walkers_per_thread`.
+        n_burnin : int, optional (default: 0)
+            Number of iterations to discard before collecting hyperposterior samples.
+            Needs to be increased only, if the hyperposterior samples have not reached
+            their typical set yet. Higher values increase the running time.
+        n_walkers_per_thread : int, optional (default: 100)
+            Number of MCMC ensemble walkers to employ during inference.
+        progress : bool, optional (default: False)
+            If True, show a progress bar during inference.
+        priors : list or callable, optional (default: None)
+            Log prior(s) for the kernel hyperparameters. Remember that the kernel
+            hyperparameters are transformed into log space. Thus your priors need to
+            perform the necessary change-of-variables.
+        position : ndarray, shape (n_walkers, n_kernel_dims), optional (default: None)
+            Starting position of the Markov chain. If None, it will use the current
+            position. If this is None as well, it will try to initialize in a small
+            ball.
+        kwargs : dict
+            Additional keyword arguments for BayesGPR.sample
+
+        """
         self.kernel = self._kernel
         self._apply_noise_vector(len(y), noise_vector)
         super().fit(X, y)
@@ -343,6 +440,30 @@ class BayesGPR(GaussianProcessRegressor):
         )
 
     def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
+        """Sample function realizations of the Gaussian process.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims)
+            Points at which to evaluate the functions.
+        sample_mean : bool, optional (default: False)
+            If True, the geometric median of the hyperposterior samples is used as the
+            Gaussian process to sample from. If False, a new set of hyperposterior
+            is used for each new sample.
+        noise : bool, optional (default: False)
+            If True, Gaussian noise is added to the samples.
+        n_samples : int, optional (default: 1)
+            Number of samples to draw from the Gaussian process(es).
+        random_state : int or RandomState or None, optional, default=None
+            Pseudo random number generator state used for random uniform sampling
+            from lists of possible values instead of scipy.stats distributions.
+
+        Returns
+        -------
+        result : ndarray, shape (n_points, n_samples)
+            Samples from the Gaussian process(es)
+
+        """
         rng = check_random_state(random_state)
         if sample_mean:
             if noise:

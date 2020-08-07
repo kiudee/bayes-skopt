@@ -386,6 +386,43 @@ class BayesGPR(GaussianProcessRegressor):
         position=None,
         **kwargs
     ):
+        """Fit the Gaussian process model to the given training data.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims)
+            Points at which the function is evaluated. If None, it will use the saved
+            datapoints.
+        y : ndarray, shape (n_points,)
+            Value(s) of the function at `X`. If None, it will use the saved values.
+        noise_vector :
+            Variance(s) of the function at `X`. If None, no additional noise is applied.
+        n_threads : int, optional (default: 1)
+            Number of threads to use during inference.
+            This is currently not implemented.
+        n_desired_samples : int, optional (default: 100)
+            Number of hyperposterior samples to collect during inference. Must be a
+            multiple of `n_walkers_per_thread`.
+        n_burnin : int, optional (default: 0)
+            Number of iterations to discard before collecting hyperposterior samples.
+            Needs to be increased only, if the hyperposterior samples have not reached
+            their typical set yet. Higher values increase the running time.
+        n_walkers_per_thread : int, optional (default: 100)
+            Number of MCMC ensemble walkers to employ during inference.
+        progress : bool, optional (default: False)
+            If True, show a progress bar during inference.
+        priors : list or callable, optional (default: None)
+            Log prior(s) for the kernel hyperparameters. Remember that the kernel
+            hyperparameters are transformed into log space. Thus your priors need to
+            perform the necessary change-of-variables.
+        position : ndarray, shape (n_walkers, n_kernel_dims), optional (default: None)
+            Starting position of the Markov chain. If None, it will use the current
+            position. If this is None as well, it will try to initialize in a small
+            ball.
+        kwargs : dict
+            Additional keyword arguments for BayesGPR.sample
+
+        """
         self.kernel = self._kernel
         self._apply_noise_vector(len(y), noise_vector)
         super().fit(X, y)

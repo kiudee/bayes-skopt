@@ -80,8 +80,10 @@ Ready to contribute? Here's how to set up `bask` for local development.
 5. When you're done making changes, check that your changes pass flake8 and the
    tests, including testing other Python versions with tox::
 
-       $ poetry run flake8 chess-tuning-tools tests
-       $ poetry run pytest
+       $ poetry run black bask tests
+       $ poetry run isort bask tests
+       $ poetry run flake8
+       $ poetry run pytest bask tests
        $ poetry run tox
 
 6. Commit your changes and push your branch to GitHub::

@@ -2,10 +2,10 @@
 History
 =======
 
-0.8.0-beta.0 (2020-08-06)
+0.8.0-beta.1 (2020-08-07)
 -------------------------
-* Add ``utils.optimum_intervals`` which for a given ``Optimizer`` instance
-  computes the highest density intervals for the optimum.
+* Add ``Optimizer.optimum_intervals`` which computes the highest density
+  intervals for the optimal parameters.
 
 0.7.2 (2020-08-01)
 ------------------

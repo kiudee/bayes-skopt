@@ -75,17 +75,39 @@ def test_probability_of_improvement(random_state):
         [[-2.0], [-1.0], [0.0], [1.0], [2.0]], [2.0, 0.0, -2.0, 0.0, 2.0], gp_burnin=10
     )
     prob = opt.probability_of_optimality(
-        threshold=1.0, n_random_starts=20, random_state=random_state
+        threshold=1.0,
+        n_random_starts=20,
+        random_state=random_state,
+        normalized_scores=False,
     )
     np.testing.assert_almost_equal(prob, 0.995)
 
     prob = opt.probability_of_optimality(
-        threshold=[0.9, 0.5], n_random_starts=20, random_state=random_state
+        threshold=[0.9, 0.5],
+        n_random_starts=20,
+        random_state=random_state,
+        normalized_scores=False,
     )
     np.testing.assert_almost_equal(prob, [0.925, 0.765], decimal=1)
 
+    prob = opt.probability_of_optimality(
+        threshold=1.0,
+        n_random_starts=20,
+        random_state=random_state,
+        normalized_scores=True,
+    )
+    np.testing.assert_almost_equal(prob, 0.99)
 
-def test_expected_optimality_gap(random_state):
+
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        (dict(normalized_scores=False, use_mean_gp=True), 0.257),
+        (dict(normalized_scores=True, use_mean_gp=True), 0.23),
+        (dict(normalized_scores=True, use_mean_gp=False), 0.21),
+    ],
+)
+def test_expected_optimality_gap(random_state, input, expected):
     opt = Optimizer(
         dimensions=[(-2.0, 2.0)], n_initial_points=0, random_state=random_state
     )
@@ -99,8 +121,10 @@ def test_expected_optimality_gap(random_state):
         n_gp_samples=100,
         n_random_starts=10,
         tol=0.1,
+        use_mean_gp=input["use_mean_gp"],
+        normalized_scores=input["normalized_scores"],
     )
-    np.testing.assert_almost_equal(gap, 0.257190451704128, decimal=2)
+    np.testing.assert_almost_equal(gap, expected, decimal=2)
 
 
 def test_optimum_intervals():

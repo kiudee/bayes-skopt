@@ -2,6 +2,12 @@
 History
 =======
 
+0.8.0-beta.2 (2020-08-08)
+-------------------------
+* Add option to normalize the optimality gap when computing
+  ``Optimizer.expected_optimality_gap`` or
+  ``Optimizer.probability_of_optimality`` (activated by default).
+
 0.8.0-beta.1 (2020-08-07)
 -------------------------
 * Add ``Optimizer.optimum_intervals`` which computes the highest density

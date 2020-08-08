@@ -391,6 +391,7 @@ class Optimizer(object):
         n_gp_samples=200,
         n_random_starts=100,
         use_mean_gp=True,
+        normalized_scores=True,
         random_state=None,
     ):
         """ Compute the probability that the current expected optimum cannot be improved
@@ -414,6 +415,10 @@ class Optimizer(object):
             usually faster, but could underestimate the variability. If False, the
             posterior distribution over hyperparameters is used to sample different GPs
             and then sample functions.
+        normalized_scores : bool, optional (default: True)
+            If True, normalize the optimality gaps by the function specific standard
+            deviation. This makes the optimality gaps more comparable, especially if
+            `use_mean_gp` is False.
         random_state : int, RandomState instance, or None (default)
             Set random state to something other than None for reproducible results.
 
@@ -439,16 +444,18 @@ class Optimizer(object):
             sample_mean=use_mean_gp,
             random_state=random_state,
         )
+        if normalized_scores:
+            std = np.std(score_samples, axis=0)
 
         if not is_listlike(threshold):
             threshold = [threshold]
         probabilities = []
         for eps in threshold:
-            probabilities.append(
-                (
-                    (score_samples[0][None, :] - eps - score_samples).max(axis=0) < 0.0
-                ).mean()
-            )
+            if normalized_scores:
+                diff = (score_samples[0][None, :] - score_samples) / std
+            else:
+                diff = score_samples[0][None, :] - score_samples
+            probabilities.append(((diff - eps).max(axis=0) < 0.0).mean())
         if len(probabilities) == 1:
             return probabilities[0]
         return probabilities
@@ -462,6 +469,7 @@ class Optimizer(object):
         n_random_starts=100,
         tol=0.01,
         use_mean_gp=True,
+        normalized_scores=True,
         random_state=None,
     ):
         """ Estimate the expected optimality gap by repeatedly sampling functions
@@ -489,6 +497,10 @@ class Optimizer(object):
             usually faster, but could underestimate the variability. If False, the
             posterior distribution over hyperparameters is used to sample different GPs
             and then sample functions.
+        normalized_scores : bool, optional (default: True)
+            If True, normalize the optimality gaps by the function specific standard
+            deviation. This makes the optimality gaps more comparable, especially if
+            `use_mean_gp` is False.
         random_state : int, RandomState instance, or None (default)
             Set random state to something other than None for reproducible results.
 
@@ -508,6 +520,7 @@ class Optimizer(object):
                 n_gp_samples=n_gp_samples,
                 n_space_samples=n_space_samples,
                 use_mean_gp=use_mean_gp,
+                normalized_scores=normalized_scores,
                 random_state=seed,
             )
             return (prob - 1.0) ** 2 + threshold ** 2 * 1e-3
@@ -531,6 +544,7 @@ class Optimizer(object):
             n_gp_samples=n_gp_samples,
             n_space_samples=n_space_samples,
             use_mean_gp=use_mean_gp,
+            normalized_scores=normalized_scores,
             random_state=seed,
         )
         expected_gap = 0.0

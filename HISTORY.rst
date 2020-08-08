@@ -2,6 +2,10 @@
 History
 =======
 
+0.8.0-beta.4 (2020-08-09)
+-------------------------
+* ``BayesGPR`` has `normalize_y` now set to `True` by default.
+
 0.8.0-beta.3 (2020-08-08)
 -------------------------
 * ``Optimizer.run`` now accepts target functions that also return a noise

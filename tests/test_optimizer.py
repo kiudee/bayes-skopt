@@ -77,7 +77,15 @@ def test_error_on_invalid_priors():
         opt.tell([(0.0,)], 0.0)
 
 
-def test_probability_of_improvement(random_state):
+@pytest.mark.parametrize(
+    "input,expected",
+    [
+        (dict(normalized_scores=False, threshold=1.0), 0.995),
+        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.99, 0.935)),
+        (dict(normalized_scores=True, threshold=1.0), 0.99),
+    ],
+)
+def test_probability_of_improvement(random_state, input, expected):
     opt = Optimizer(
         dimensions=[(-2.0, 2.0)], n_initial_points=0, random_state=random_state
     )
@@ -85,36 +93,20 @@ def test_probability_of_improvement(random_state):
         [[-2.0], [-1.0], [0.0], [1.0], [2.0]], [2.0, 0.0, -2.0, 0.0, 2.0], gp_burnin=10
     )
     prob = opt.probability_of_optimality(
-        threshold=1.0,
+        threshold=input["threshold"],
         n_random_starts=20,
         random_state=random_state,
-        normalized_scores=False,
+        normalized_scores=input["normalized_scores"],
     )
-    np.testing.assert_almost_equal(prob, 0.995)
-
-    prob = opt.probability_of_optimality(
-        threshold=[0.9, 0.5],
-        n_random_starts=20,
-        random_state=random_state,
-        normalized_scores=False,
-    )
-    np.testing.assert_almost_equal(prob, [0.925, 0.765], decimal=1)
-
-    prob = opt.probability_of_optimality(
-        threshold=1.0,
-        n_random_starts=20,
-        random_state=random_state,
-        normalized_scores=True,
-    )
-    np.testing.assert_almost_equal(prob, 0.99)
+    np.testing.assert_almost_equal(prob, expected, decimal=2)
 
 
 @pytest.mark.parametrize(
     "input,expected",
     [
-        (dict(normalized_scores=False, use_mean_gp=True), 0.257),
-        (dict(normalized_scores=True, use_mean_gp=True), 0.23),
-        (dict(normalized_scores=True, use_mean_gp=False), 0.21),
+        (dict(normalized_scores=False, use_mean_gp=True), 0.2),
+        (dict(normalized_scores=True, use_mean_gp=True), 0.16),
+        (dict(normalized_scores=True, use_mean_gp=False), 0.17),
     ],
 )
 def test_expected_optimality_gap(random_state, input, expected):

@@ -361,7 +361,8 @@ class Optimizer(object):
         Parameters
         ----------
         func : function
-            The objective function to minimize.
+            The objective function to minimize. Should either return a scalar value,
+            or a tuple (value, noise) where the noise should be a variance.
         n_iter : int, optional (default: 1)
             Number of iterations to perform.
         replace : bool, optional (default: False)
@@ -390,9 +391,16 @@ class Optimizer(object):
         """
         for _ in range(n_iter):
             x = self.ask()
+            out = func(x)
+            if hasattr(out, "__len__"):
+                val, noise = out
+            else:
+                val = out
+                noise = 0.0
             self.tell(
                 x,
-                func(x),
+                val,
+                noise_vector=noise,
                 n_samples=n_samples,
                 gp_samples=gp_samples,
                 gp_burnin=gp_burnin,

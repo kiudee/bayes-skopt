@@ -84,13 +84,12 @@ class BayesGPR(GaussianProcessRegressor):
         from the space of allowed theta-values. If greater than 0, all bounds
         must be finite. Note that n_restarts_optimizer == 0 implies that one
         run is performed.
-    normalize_y : boolean, optional (default: False)
+    normalize_y : boolean, optional (default: True)
         Whether the target values y are normalized, i.e., the mean of the
         observed target values become zero. This parameter should be set to
         True if the target values' mean is expected to differ considerable from
         zero. When enabled, the normalization effectively modifies the GP's
-        prior based on the data, which contradicts the likelihood principle;
-        normalization is thus disabled per default.
+        prior based on the data, which contradicts the likelihood principle.
     copy_X_train : bool, optional (default: True)
         If True, a persistent copy of the training data is stored in the
         object. Otherwise, just a reference to the training data is stored,
@@ -138,7 +137,7 @@ class BayesGPR(GaussianProcessRegressor):
         alpha=1e-10,
         optimizer="fmin_l_bfgs_b",
         n_restarts_optimizer=0,
-        normalize_y=False,
+        normalize_y=True,
         copy_X_train=True,
         random_state=None,
         noise="gaussian",
@@ -288,7 +287,6 @@ class BayesGPR(GaussianProcessRegressor):
             Additional keyword arguments for emcee.EnsembleSampler
 
         """
-
 
         def log_prob_fn(x, gp=self):
             lp = 0

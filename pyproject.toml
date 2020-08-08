@@ -59,7 +59,7 @@ flake8-bugbear = "^20.1.4"
 docs = ["Sphinx", "numpydoc", "nbsphinx", "nbsphinx-link"]
 
 [tool.poetry.scripts]
-tune = "bask.cli:main"
+bask = "bask.cli:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/kiudee/bayes-skopt/issues"

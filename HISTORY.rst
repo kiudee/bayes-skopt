@@ -2,6 +2,12 @@
 History
 =======
 
+0.8.0-beta.3 (2020-08-08)
+-------------------------
+* ``Optimizer.run`` now accepts target functions that also return a noise
+  estimate.
+* ``Optimizer.run`` accepts the same arguments as ``Optimizer.tell``.
+
 0.8.0-beta.2 (2020-08-08)
 -------------------------
 * Add option to normalize the optimality gap when computing

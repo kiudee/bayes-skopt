@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+from numpy.testing import assert_almost_equal
 from sklearn.utils.testing import assert_equal
 from skopt.benchmarks import bench1
 
@@ -55,6 +56,15 @@ def test_noise_vector():
     # Check, if passing a single point works correctly:
     x = opt.ask()
     opt.tell(x, 0.0, noise_vector=0.5)
+
+
+def test_run_with_noise(random_state):
+    def func(x):
+        return (np.sin(x) + random_state.randn()).item(), 1.0
+
+    opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=1)
+    opt.run(func, n_iter=2, n_samples=1, gp_burnin=0)
+    assert_almost_equal(opt.gp.alpha, np.ones(2))
 
 
 def test_no_error_on_unknown_kwargs():

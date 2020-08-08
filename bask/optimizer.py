@@ -353,18 +353,29 @@ class Optimizer(object):
 
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
 
-    def run(self, func, n_iter=1, n_samples=5, gp_burnin=10):
+    def run(
+        self, func, n_iter=1, replace=False, n_samples=5, gp_samples=100, gp_burnin=10
+    ):
         """Execute the ask/tell-loop on a given objective function.
 
         Parameters
         ----------
         func : function
-            The objective function to minimize.
+            The objective function to minimize. Should either return a scalar value,
+            or a tuple (value, noise) where the noise should be a variance.
         n_iter : int, optional (default: 1)
             Number of iterations to perform.
+        replace : bool, optional (default: False)
+            If True, the existing data points will be replaced with the ones collected
+            from now on. The existing model will be used as initialization.
         n_samples : int, optional (default: 5)
             Number of hyperposterior samples over which to average the acquisition
             function.
+        gp_samples : int, optional (default: 100)
+            Number of hyperposterior samples to collect during inference. More samples
+            result in a more accurate representation of the hyperposterior, but
+            increase the running time.
+            Has to be a multiple of 100.
         gp_burnin : int, optional (default: 10)
             Number of inference iterations to discard before beginning collecting
             hyperposterior samples. Only needs to be increased, if the hyperposterior
@@ -380,7 +391,22 @@ class Optimizer(object):
         """
         for _ in range(n_iter):
             x = self.ask()
-            self.tell(x, func(x), n_samples=n_samples, gp_burnin=gp_burnin)
+            out = func(x)
+            if hasattr(out, "__len__"):
+                val, noise = out
+            else:
+                val = out
+                noise = 0.0
+            self.tell(
+                x,
+                val,
+                noise_vector=noise,
+                n_samples=n_samples,
+                gp_samples=gp_samples,
+                gp_burnin=gp_burnin,
+                replace=replace,
+            )
+            replace = False
 
         return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
 

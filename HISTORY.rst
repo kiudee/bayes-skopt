@@ -2,26 +2,18 @@
 History
 =======
 
-0.8.0-beta.4 (2020-08-09)
--------------------------
-* ``BayesGPR`` has `normalize_y` now set to `True` by default.
+0.8.0 (2020-08-09)
+------------------
 
-0.8.0-beta.3 (2020-08-08)
--------------------------
-* ``Optimizer.run`` now accepts target functions that also return a noise
-  estimate.
-* ``Optimizer.run`` accepts the same arguments as ``Optimizer.tell``.
-
-0.8.0-beta.2 (2020-08-08)
--------------------------
+* Add ``Optimizer.optimum_intervals`` which computes the highest density
+  intervals for the optimal parameters.
+* ``BayesGPR`` has ``normalize_y`` now set to ``True`` by default.
 * Add option to normalize the optimality gap when computing
   ``Optimizer.expected_optimality_gap`` or
   ``Optimizer.probability_of_optimality`` (activated by default).
-
-0.8.0-beta.1 (2020-08-07)
--------------------------
-* Add ``Optimizer.optimum_intervals`` which computes the highest density
-  intervals for the optimal parameters.
+* ``Optimizer.run`` now accepts target functions that also return a noise
+  estimate.
+* ``Optimizer.run`` accepts the same arguments as ``Optimizer.tell``.
 
 0.7.2 (2020-08-01)
 ------------------

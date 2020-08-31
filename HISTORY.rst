@@ -2,6 +2,11 @@
 History
 =======
 
+0.9.0 (2020-08-31)
+------------------
+* Add support for automatic input warping. It can be activated by passing
+  ``warp_inputs=True`` to ``BayesGPR``.
+
 0.8.0 (2020-08-09)
 ------------------
 

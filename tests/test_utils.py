@@ -1,3 +1,5 @@
+import numpy as np
+import pytest
 from numpy.testing import assert_almost_equal
 from skopt.learning.gaussian_process.kernels import (
     RBF,
@@ -7,7 +9,7 @@ from skopt.learning.gaussian_process.kernels import (
     WhiteKernel,
 )
 
-from bask.utils import construct_default_kernel, guess_priors
+from bask.utils import construct_default_kernel, guess_priors, validate_zeroone
 
 
 def test_construct_default_kernel():
@@ -36,3 +38,12 @@ def test_guess_priors():
     ]
     for p, v in zip(priors, expected):
         assert_almost_equal(p(-0.9), v)
+
+
+def test_validate_zeroone():
+    validate_zeroone(np.linspace(0, 1, num=10))
+    validate_zeroone([0.0, 0.5, 1.0])
+    with pytest.raises(ValueError):
+        validate_zeroone(np.array((0.1, -0.1)))
+    with pytest.raises(ValueError):
+        validate_zeroone(np.array((0.1, np.inf)))

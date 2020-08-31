@@ -12,6 +12,7 @@ __all__ = [
     "r2_sequence",
     "guess_priors",
     "construct_default_kernel",
+    "validate_zeroone",
 ]
 
 
@@ -237,3 +238,23 @@ def get_progress_bar(display, total):
         return tqdm.tqdm(total=total)  # noqa: F821
     else:
         return _NoOpPBar()
+
+
+def validate_zeroone(arr):
+    """Check if all entries of the input are between 0 and 1.
+
+    Parameters
+    ----------
+    X : ndarray
+        Array containing arbitrary values.
+
+    Raises
+    ------
+    ValueError
+        If the values of the array are not between 0 and 1 (inclusive).
+    """
+    if not isinstance(arr, np.ndarray):
+        arr = np.array(arr)
+    if np.any(arr < 0) or np.any(arr > 1):
+        raise ValueError("Not all values of the array are between 0 and 1.")
+    return

@@ -338,6 +338,36 @@ class BayesGPR(GaussianProcessRegressor):
             alpha[: len(noise_vector)] += noise_vector
             self.alpha = alpha
 
+    def _log_prob_fn(self, x, priors, warp_priors):
+        lp = 0
+        if self.warp_inputs:
+            n_dim = self.X_train_.shape[1]
+            x_warp = x[-2 * n_dim :]
+            x_gp = x[: len(x) - 2 * n_dim]
+            alphas, betas = x_warp[:n_dim], x_warp[n_dim:]
+            self.create_warpers(alphas, betas)
+            self.rewarp()
+            for a_log, b_log in zip(alphas, betas):
+                if isinstance(warp_priors, Iterable):
+                    lp += warp_priors[0](a_log)
+                    lp += warp_priors[1](b_log)
+                else:
+                    lp += warp_priors(a_log, b_log)
+        else:
+            x_gp = x
+        if isinstance(priors, Iterable):
+            for prior, val in zip(priors, x_gp):
+                lp += prior(val)
+        else:  # Assume priors is a callable, which evaluates the log probability:
+            lp += priors(x_gp)
+        try:
+            lp = lp + self.log_marginal_likelihood(theta=x_gp)
+        except ValueError:
+            return -np.inf
+        if not np.isfinite(lp):
+            return -np.inf
+        return lp
+
     def sample(
         self,
         X=None,
@@ -407,36 +437,6 @@ class BayesGPR(GaussianProcessRegressor):
 
         """
 
-        def log_prob_fn(x, gp=self):
-            lp = 0
-            if gp.warp_inputs:
-                n_dim = self.X_train_.shape[1]
-                x_warp = x[-2 * n_dim :]
-                x_gp = x[: len(x) - 2 * n_dim]
-                alphas, betas = x_warp[:n_dim], x_warp[n_dim:]
-                self.create_warpers(alphas, betas)
-                self.rewarp()
-                for a_log, b_log in zip(alphas, betas):
-                    if isinstance(warp_priors, Iterable):
-                        lp += warp_priors[0](a_log)
-                        lp += warp_priors[1](b_log)
-                    else:
-                        lp += warp_priors(a_log, b_log)
-            else:
-                x_gp = x
-            if isinstance(priors, Iterable):
-                for prior, val in zip(priors, x_gp):
-                    lp += prior(val)
-            else:  # Assume priors is a callable, which evaluates the log probability:
-                lp += priors(x_gp)
-            try:
-                lp = lp + gp.log_marginal_likelihood(theta=x_gp)
-            except ValueError:
-                return -np.inf
-            if not np.isfinite(lp):
-                return -np.inf
-            return lp
-
         if X is None and not hasattr(self, "X_train_") or self.kernel_ is None:
             raise ValueError(
                 """
@@ -490,7 +490,8 @@ class BayesGPR(GaussianProcessRegressor):
         self._sampler = mc.EnsembleSampler(
             nwalkers=n_walkers,
             ndim=n_dim,
-            log_prob_fn=log_prob_fn,
+            log_prob_fn=self._log_prob_fn,
+            kwargs=dict(priors=priors, warp_priors=warp_priors),
             threads=n_threads,
             **kwargs
         )

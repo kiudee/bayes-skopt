@@ -6,7 +6,7 @@ from scipy.linalg import cho_solve, cholesky
 from scipy.optimize import bisect
 from sklearn.utils import check_random_state
 
-from bask.utils import get_progress_bar
+from bask.utils import get_progress_bar, validate_zeroone
 
 __all__ = [
     "evaluate_acquisitions",
@@ -94,15 +94,29 @@ def evaluate_acquisitions(
     acq_output = np.zeros((n_acqs, n_cand_points))
     random_state = check_random_state(random_state)
     trace_sample_i = random_state.choice(len(gpr.chain_), replace=False, size=n_samples)
-    param_backup = np.copy(gpr.theta)
+    theta_backup = np.copy(gpr.theta)
+    if gpr.warp_inputs:
+        alphas_backup = np.copy(gpr.warp_alphas_)
+        betas_backup = np.copy(gpr.warp_betas_)
+        X_orig = np.copy(X)
+        validate_zeroone(X_orig)
     pbar = get_progress_bar(progress, len(trace_sample_i))
     for i_acq, acq in enumerate(acquisition_functions):
         if isinstance(acq, FullGPAcquisition):
+            # We do not apply warping to X here, since the GP is doing that internally
             out = acq(X, gpr, random_state=random_state, **kwargs)
             if np.all(np.isfinite(out)):
                 acq_output[i_acq] = out
     for i in trace_sample_i:
-        gpr.theta = gpr.chain_[i]
+        if gpr.warp_inputs:
+            warp_params = gpr.chain_[i][len(gpr.kernel_.theta) :]
+            alphas, betas = warp_params[: X.shape[1]], warp_params[X.shape[1] :]
+            gpr.create_warpers(alphas, betas)
+            gpr.rewarp()
+            gpr.theta = gpr.chain_[i][: len(gpr.kernel_.theta)]
+            # We do not apply warping to X here, since predict is already doing so
+        else:
+            gpr.theta = gpr.chain_[i]
         with gpr.noise_set_to_zero():
             mu_generated = False
             sample_generated = False
@@ -122,7 +136,10 @@ def evaluate_acquisitions(
                 if np.all(np.isfinite(tmp_out)):
                     acq_output[j] += tmp_out / n_samples
         pbar.update(1)
-    gpr.theta = param_backup
+    if gpr.warp_inputs:
+        gpr.create_warpers(alphas_backup, betas_backup)
+        gpr.rewarp()
+    gpr.theta = theta_backup
     return acq_output
 
 
@@ -260,6 +277,8 @@ class VarianceReduction(FullGPAcquisition):
 
     def __call__(self, X, gp, *args, **kwargs):
         n = len(X)
+        if gp.warp_inputs:
+            X = gp.warp(X)
         covs = np.empty(n)
         for i in range(n):
             X_train_aug = np.concatenate([gp.X_train_, [X[i]]])
@@ -294,6 +313,8 @@ class PVRS(FullGPAcquisition):
         )
         thompson_points = np.array(X)[np.argmin(thompson_sample, axis=0)]
         covs = np.empty(n)
+        if gp.warp_inputs:
+            X = gp.warp(X)
         for i in range(n):
             X_train_aug = np.concatenate([gp.X_train_, [X[i]]])
             K = gp.kernel_(X_train_aug)

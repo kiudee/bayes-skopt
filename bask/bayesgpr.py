@@ -3,13 +3,14 @@ from contextlib import contextmanager, nullcontext
 
 import emcee as mc
 import numpy as np
+import scipy.stats as st
 from scipy.linalg import cho_solve, cholesky, solve_triangular
 from sklearn.utils import check_random_state
 from skopt.learning import GaussianProcessRegressor
 from skopt.learning.gaussian_process.gpr import _param_for_white_kernel_in_Sum
 from skopt.learning.gaussian_process.kernels import WhiteKernel
 
-from .utils import geometric_median, guess_priors
+from .utils import geometric_median, guess_priors, validate_zeroone
 
 __all__ = ["BayesGPR"]
 
@@ -90,6 +91,11 @@ class BayesGPR(GaussianProcessRegressor):
         True if the target values' mean is expected to differ considerable from
         zero. When enabled, the normalization effectively modifies the GP's
         prior based on the data, which contradicts the likelihood principle.
+    warp_inputs : boolean, optional (default: False)
+        If True, each input dimension will be warped (internally) using the cumulative
+        distribution function of a beta distribution [1]_. The parameters of each beta
+        distribution will be inferred from the data. The input data needs to be
+        in [0, 1].
     copy_X_train : bool, optional (default: True)
         If True, a persistent copy of the training data is stored in the
         object. Otherwise, just a reference to the training data is stored,
@@ -129,6 +135,14 @@ class BayesGPR(GaussianProcessRegressor):
         Last position of the Markov chain. Useful for continuing sampling when new
         datapoints arrive. fit(X, y) internally uses an existing pos_ to resume
         sampling, if no other position is provided.
+
+    References
+    ----------
+    .. [1] Snoek, Jasper, Kevin Swersky, Richard Zemel, and Ryan P. Adams. “Input
+       Warping for Bayesian Optimization of Non-Stationary Functions.”
+       In Proceedings of the 31st International Conference on International
+       Conference on Machine Learning - Volume 32, II–1674–II–1682.
+       ICML’14. Beijing, China: JMLR.org, 2014.
     """
 
     def __init__(
@@ -138,6 +152,7 @@ class BayesGPR(GaussianProcessRegressor):
         optimizer="fmin_l_bfgs_b",
         n_restarts_optimizer=0,
         normalize_y=True,
+        warp_inputs=False,
         copy_X_train=True,
         random_state=None,
         noise="gaussian",
@@ -158,6 +173,7 @@ class BayesGPR(GaussianProcessRegressor):
             noise,
         )
         self._alpha = self.alpha
+        self.warp_inputs = warp_inputs
         self._sampler = None
         self.chain_ = None
         self.pos_ = None
@@ -200,6 +216,101 @@ class BayesGPR(GaussianProcessRegressor):
             raise
         self.alpha_ = cho_solve((self.L_, True), self.y_train_)
 
+    @property
+    def X_train_(self):
+        """ The training data which was used to train the Gaussian process.
+
+        If input warping is used, it will return the warped instances.
+
+        Returns
+        -------
+        array-like, shape = (n_samples, n_features)
+            Feature values in training data (also required for prediction).
+            If `warp_inputs=True`, will contain the warped inputs in [0, 1].
+        """
+        if hasattr(self, "_X_train_orig_"):
+            if self.warp_inputs:
+                return self._X_train_warped_
+            return self._X_train_orig_
+        return None
+
+    @X_train_.setter
+    def X_train_(self, X_train):
+        self._X_train_orig_ = np.copy(X_train) if self.copy_X_train else X_train
+        if self.warp_inputs:
+            self._X_train_warped_ = np.copy(self._X_train_orig_)
+            if hasattr(self, "warpers_"):
+                for col, warper in enumerate(self.warpers_):
+                    self._X_train_warped_[:, col] = warper(self._X_train_orig_[:, col])
+            # If no warpers exist yet, we begin with an unwarped input space
+
+    def warp(self, X):
+        """Warp the input X using the existing warpers.
+
+        Returns X if `warp_inputs=False` or if no warpers have been fit yet.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims)
+            Points in the original space which should be warped.
+        """
+        if self.warp_inputs and hasattr(self, "warpers_"):
+            X_warped = np.empty_like(X)
+            for col, warper in enumerate(self.warpers_):
+                X_warped[:, col] = warper(X[:, col])
+            X = X_warped
+        return X
+
+    def unwarp(self, X):
+        """Unwarp the input X back to the original input space.
+
+        Returns X if `warp_inputs=False` or if no warpers have been fit yet.
+
+        Parameters
+        ----------
+        X : ndarray, shape (n_points, n_dims)
+            Points in the warped space which should be transformed back to the input
+            space.
+        """
+        if self.warp_inputs and hasattr(self, "warpers_"):
+            X_orig = np.empty_like(X)
+            for col, unwarper in enumerate(self.unwarpers_):
+                X_orig[:, col] = unwarper(X[:, col])
+            X = X_orig
+        return X
+
+    def rewarp(self):
+        """Apply warping again to X_train_ after parameters have changed.
+
+        Does nothing if `warp_inputs=False` or if no warpers have been fit yet.
+        """
+        if self.warp_inputs:
+            if hasattr(self, "warpers_") and hasattr(self, "_X_train_orig_"):
+                self._X_train_warped_ = np.empty_like(self._X_train_orig_)
+                for col, warper in enumerate(self.warpers_):
+                    self._X_train_warped_[:, col] = warper(self._X_train_orig_[:, col])
+
+    def create_warpers(self, alphas, betas):
+        """Create Beta CDFs and inverse CDFs for input (un)warping.
+
+        Parameters
+        ----------
+        alphas : ndarray, shape (n_dims)
+            Raw alpha parameters of the Beta distributions in log-space.
+        betas : ndarray, shape (n_dims)
+            Raw beta parameters of the Beta distributions in log-space.
+        """
+        if self.warp_inputs:
+            self.warpers_ = []
+            self.unwarpers_ = []
+            self.warp_alphas_ = np.copy(alphas)
+            self.warp_betas_ = np.copy(betas)
+            for a_log, b_log in zip(alphas, betas):
+                a, b = np.exp(a_log), np.exp(b_log)
+                dist = st.beta(a=a, b=b)
+                self.warpers_.append(dist.cdf)
+                self.unwarpers_.append(dist.ppf)
+
     @contextmanager
     def noise_set_to_zero(self):
         """Context manager in which the noise of the Gaussian process is 0.
@@ -239,6 +350,7 @@ class BayesGPR(GaussianProcessRegressor):
         n_walkers_per_thread=100,
         progress=False,
         priors=None,
+        warp_priors=None,
         position=None,
         add=False,
         **kwargs
@@ -276,6 +388,13 @@ class BayesGPR(GaussianProcessRegressor):
             Log prior(s) for the kernel hyperparameters. Remember that the kernel
             hyperparameters are transformed into log space. Thus your priors need to
             perform the necessary change-of-variables.
+        warp_priors : list or callable, optional (default: None)
+            Log prior(s) for the parameters of the Beta distribution used to warp each
+            dimension. Only used, if `warp_inputs=True`.
+            By default uses a log-normal distribution with mean 0 and standard deviation
+            of 0.5 for each parameter of the Beta distribution. This prior favors the
+            identity transformation and sufficient data is needed to shift towards a
+            stronger warping function.
         position : ndarray, shape (n_walkers, n_kernel_dims), optional (default: None)
             Starting position of the Markov chain. If None, it will use the current
             position. If this is None as well, it will try to initialize in a small
@@ -290,13 +409,28 @@ class BayesGPR(GaussianProcessRegressor):
 
         def log_prob_fn(x, gp=self):
             lp = 0
+            if gp.warp_inputs:
+                n_dim = self.X_train_.shape[1]
+                x_warp = x[-2 * n_dim :]
+                x_gp = x[: len(x) - 2 * n_dim]
+                alphas, betas = x_warp[:n_dim], x_warp[n_dim:]
+                self.create_warpers(alphas, betas)
+                self.rewarp()
+                for a_log, b_log in zip(alphas, betas):
+                    if isinstance(warp_priors, Iterable):
+                        lp += warp_priors[0](a_log)
+                        lp += warp_priors[1](b_log)
+                    else:
+                        lp += warp_priors(a_log, b_log)
+            else:
+                x_gp = x
             if isinstance(priors, Iterable):
-                for prior, val in zip(priors, x):
+                for prior, val in zip(priors, x_gp):
                     lp += prior(val)
             else:  # Assume priors is a callable, which evaluates the log probability:
-                lp += priors(x)
+                lp += priors(x_gp)
             try:
-                lp = lp + gp.log_marginal_likelihood(theta=x)
+                lp = lp + gp.log_marginal_likelihood(theta=x_gp)
             except ValueError:
                 return -np.inf
             if not np.isfinite(lp):
@@ -315,6 +449,12 @@ class BayesGPR(GaussianProcessRegressor):
         if priors is None:
             priors = guess_priors(self.kernel_)
 
+        if warp_priors is None:
+            warp_priors = (
+                st.norm(loc=0.0, scale=0.5).logpdf,
+                st.norm(loc=0.0, scale=0.5).logpdf,
+            )
+
         # Update data, if available:
         if X is not None:
             if self.normalize_y:
@@ -322,6 +462,7 @@ class BayesGPR(GaussianProcessRegressor):
                 y = y - self._y_train_mean
             else:
                 self._y_train_mean = np.zeros(1)
+
             self.X_train_ = np.copy(X) if self.copy_X_train else X
             self.y_train_ = np.copy(y) if self.copy_X_train else y
 
@@ -335,15 +476,14 @@ class BayesGPR(GaussianProcessRegressor):
             pos = position
         elif self.pos_ is not None:
             pos = self.pos_
-        # elif backup_file is not None:
-        #     try:
-        #         with open(backup_file, 'rb') as f:
-        #             pos = np.load(f)
-        #     except FileNotFoundError:
-        #         pass
+        if self.warp_inputs:
+            added_dims = self.X_train_.shape[1] * 2
+            n_dim += added_dims
         if pos is None:
             theta = self.theta
             theta[np.isinf(theta)] = np.log(self.noise_)
+            if self.warp_inputs:
+                theta = np.concatenate([theta, np.zeros(added_dims)])
             pos = [
                 theta + 1e-2 * self.random_state.randn(n_dim) for _ in range(n_walkers)
             ]
@@ -367,7 +507,19 @@ class BayesGPR(GaussianProcessRegressor):
             self.chain_ = np.concatenate([self.chain_, chain])
         else:
             self.chain_ = chain
-        self.theta = geometric_median(self.chain_)
+        if self.warp_inputs:
+            median = geometric_median(self.chain_)
+            warp_params = median[len(self.theta) :]
+            alphas = warp_params[: self.X_train_.shape[1]]
+            betas = warp_params[self.X_train_.shape[1] :]
+            self.create_warpers(alphas, betas)
+            self.rewarp()
+            self.theta = median[: len(self.theta)]
+        else:
+            self.theta = geometric_median(self.chain_)
+        self.log_marginal_likelihood_value_ = self.log_marginal_likelihood(
+            self.kernel_.theta, clone_kernel=False
+        )
         self.pos_ = pos
 
     def fit(
@@ -381,6 +533,7 @@ class BayesGPR(GaussianProcessRegressor):
         n_walkers_per_thread=100,
         progress=True,
         priors=None,
+        warp_priors=None,
         position=None,
         **kwargs
     ):
@@ -432,9 +585,25 @@ class BayesGPR(GaussianProcessRegressor):
             n_walkers_per_thread=n_walkers_per_thread,
             progress=progress,
             priors=priors,
+            warp_priors=warp_priors,
             position=position,
             add=False,
             **kwargs
+        )
+
+    def predict(
+        self,
+        X,
+        return_std=False,
+        return_cov=False,
+        return_mean_grad=False,
+        return_std_grad=False,
+    ):
+        if self.warp_inputs:
+            validate_zeroone(X)
+            X = self.warp(X)
+        return super().predict(
+            X, return_std, return_cov, return_mean_grad, return_std_grad
         )
 
     def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
@@ -461,6 +630,10 @@ class BayesGPR(GaussianProcessRegressor):
         result : ndarray, shape (n_points, n_samples)
             Samples from the Gaussian process(es)
 
+        Raises
+        ------
+        ValueError
+            If `warp_inputs=True` and the entries of X are not all between 0 and 1.
         """
         rng = check_random_state(random_state)
         if sample_mean:
@@ -469,16 +642,30 @@ class BayesGPR(GaussianProcessRegressor):
             else:
                 cm = self.noise_set_to_zero()
             with cm:
+                if self.warp_inputs:
+                    X = self.warp(X)
                 samples = super().sample_y(X, n_samples=n_samples, random_state=rng)
             return samples
         ind = rng.choice(len(self.chain_), size=n_samples, replace=True)
+        if self.warp_inputs:
+            current_warp_alphas = np.copy(self.warp_alphas_)
+            current_warp_betas = np.copy(self.warp_betas_)
         current_theta = self.theta
         current_K_inv = np.copy(self.K_inv_)
         current_L = np.copy(self.L_)
         current_alpha = np.copy(self.alpha_)
         result = np.empty((X.shape[0], n_samples))
         for i, j in enumerate(ind):
-            theta = self.chain_[j]
+            if self.warp_inputs:
+                validate_zeroone(X)
+                theta = self.chain_[j][: len(self.kernel_.theta)]
+                warp_params = self.chain_[j][len(self.kernel_.theta) :]
+                alphas, betas = warp_params[: X.shape[1]], warp_params[X.shape[1] :]
+                self.create_warpers(alphas, betas)
+                self.rewarp()
+                X = self.warp(X)
+            else:
+                theta = self.chain_[j]
             self.theta = theta
             if noise:
                 cm = nullcontext(self)
@@ -491,5 +678,8 @@ class BayesGPR(GaussianProcessRegressor):
         self.kernel_.theta = current_theta
         self.K_inv_ = current_K_inv
         self.alpha_ = current_alpha
+        if self.warp_inputs:
+            self.warp_alphas_ = current_warp_alphas
+            self.warp_betas_ = current_warp_betas
         self.L_ = current_L
         return result

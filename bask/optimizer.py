@@ -334,9 +334,15 @@ class Optimizer(object):
                         progress=progress,
                     )
 
-            X = self.space.transform(
-                self.space.rvs(n_samples=self.n_points, random_state=self.rng)
-            )
+            if self.gp.warp_inputs:
+                X_warped = self.rng.uniform(
+                    size=(self.n_points, self.space.transformed_n_dims)
+                )
+                X = self.gp.unwarp(X_warped)
+            else:
+                X = self.space.transform(
+                    self.space.rvs(n_samples=self.n_points, random_state=self.rng)
+                )
             acq_values = evaluate_acquisitions(
                 X=X,
                 gpr=self.gp,

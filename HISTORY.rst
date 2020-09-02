@@ -2,6 +2,10 @@
 History
 =======
 
+0.9.1 (2020-09-02)
+------------------
+* Fix calculation of max-value entropy search and make it more robust.
+
 0.9.0 (2020-08-31)
 ------------------
 * Add support for automatic input warping. It can be activated by passing

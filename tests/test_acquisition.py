@@ -3,7 +3,17 @@ import pytest
 from scipy.stats import halfnorm, invgamma
 from skopt.learning.gaussian_process.kernels import RBF, ConstantKernel
 
-from bask.acquisition import PVRS, VarianceReduction, evaluate_acquisitions
+from bask.acquisition import (
+    LCB,
+    PVRS,
+    Expectation,
+    ExpectedImprovement,
+    MaxValueSearch,
+    ThompsonSampling,
+    TopTwoEI,
+    VarianceReduction,
+    evaluate_acquisitions,
+)
 from bask.bayesgpr import BayesGPR
 
 
@@ -29,29 +39,32 @@ def minimal_priors():
     ]
 
 
-def test_variance_reduction(minimal_gp, minimal_priors):
+@pytest.mark.parametrize(
+    "acq_func, n_samples, expected",
+    [
+        (MaxValueSearch, 1, 37),
+        (VarianceReduction, 0, 50),
+        (PVRS, 0, 38),
+        (LCB, 1, 38),
+        (ExpectedImprovement, 1, 33),
+        (Expectation, 1, 30),
+        (ThompsonSampling, 1, 25),
+        (TopTwoEI, 1, 32),
+    ],
+)
+def test_acquisition(acq_func, n_samples, expected, minimal_gp, minimal_priors):
     x = np.array([-2.0, -1.0, 1.0, 2.0])[:, None]
     y = np.array([0, -1, 1, 2])
 
     minimal_gp.fit(x, y, priors=minimal_priors, progress=False, n_burnin=1)
 
+    x = np.linspace(-2.0, 2.0, num=101)[:, None]
+
     acq = evaluate_acquisitions(
-        X=np.array([-2.0, -1.0, 0.0, 1.0, 2.0])[:, None],
+        X=x,
         gpr=minimal_gp,
-        acquisition_functions=[VarianceReduction()],
+        acquisition_functions=[acq_func()],
         random_state=1,
-        n_samples=0,
+        n_samples=n_samples,
     )
-    assert np.argmax(acq) == 2
-
-
-def test_pvrs(minimal_gp, minimal_priors):
-    x = np.array([-2.0, -1.0, 0.0, 1.0, 2.0])[:, None]
-    y = np.array([0, -1, 0, 1, 2])
-
-    minimal_gp.fit(x, y, priors=minimal_priors, progress=False, n_burnin=1)
-
-    acq = evaluate_acquisitions(
-        x, gpr=minimal_gp, acquisition_functions=[PVRS()], random_state=1, n_samples=0
-    )
-    assert np.argmax(acq) == 1
+    assert np.argmax(acq) == expected

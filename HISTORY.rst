@@ -2,6 +2,10 @@
 History
 =======
 
+0.9.2 (2020-09-04)
+------------------
+* Fix incorrect recomputation of y mean when using ``normalize_y=True``.
+
 0.9.1 (2020-09-02)
 ------------------
 * Fix calculation of max-value entropy search and make it more robust.

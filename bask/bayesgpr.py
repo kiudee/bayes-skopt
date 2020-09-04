@@ -458,10 +458,10 @@ class BayesGPR(GaussianProcessRegressor):
         # Update data, if available:
         if X is not None:
             if self.normalize_y:
-                self._y_train_mean = np.mean(y, axis=0)
-                y = y - self._y_train_mean
+                self.y_train_mean_ = np.mean(y, axis=0)
+                y = y - self.y_train_mean_
             else:
-                self._y_train_mean = np.zeros(1)
+                self.y_train_mean_ = np.zeros(1)
 
             self.X_train_ = np.copy(X) if self.copy_X_train else X
             self.y_train_ = np.copy(y) if self.copy_X_train else y

@@ -451,8 +451,8 @@ class BayesGPR(GaussianProcessRegressor):
 
         if warp_priors is None:
             warp_priors = (
-                st.norm(loc=0.0, scale=0.5).logpdf,
-                st.norm(loc=0.0, scale=0.5).logpdf,
+                st.norm(loc=0.0, scale=0.3).logpdf,
+                st.norm(loc=0.0, scale=0.3).logpdf,
             )
 
         # Update data, if available:

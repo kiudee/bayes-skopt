@@ -2,6 +2,11 @@
 History
 =======
 
+0.9.3 (2020-09-14)
+------------------
+* Make default priors for input warping more focused on the identity transform.
+  This fixes issues with overfitting in high noise environments.
+
 0.9.2 (2020-09-04)
 ------------------
 * Fix incorrect recomputation of y mean when using ``normalize_y=True``.

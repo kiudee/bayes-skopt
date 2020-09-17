@@ -12,11 +12,11 @@ from skopt.utils import (
     normalize_dimensions,
 )
 
+from bask import acquisition
 from bask.acquisition import evaluate_acquisitions
-
-from . import acquisition
-from .bayesgpr import BayesGPR
-from .utils import construct_default_kernel, r2_sequence
+from bask.bayesgpr import BayesGPR
+from bask.init import r2_sequence
+from bask.utils import construct_default_kernel
 
 __all__ = ["Optimizer"]
 

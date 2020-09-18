@@ -15,7 +15,7 @@ from skopt.utils import (
 from bask import acquisition
 from bask.acquisition import evaluate_acquisitions
 from bask.bayesgpr import BayesGPR
-from bask.init import r2_sequence
+from bask.init import r2_sequence, sb_sequence
 from bask.utils import construct_default_kernel
 
 __all__ = ["Optimizer"]
@@ -52,10 +52,14 @@ class Optimizer(object):
         Number of random points to evaluate the acquisition function on.
     n_initial_points : int, default=10
         Number of initial points to sample before fitting the GP.
-    init_strategy : string or None, default="r2"
-        Sampling strategy to use for the initial ``n_initial_points``.
-        "r2" computes points using the quasirandom R2 sequence. If the value
-        is None or any other string, uniform random sampling is employed.
+    init_strategy : string or None, default="sb"
+        Type of initialization strategy to use for the initial
+        ``n_initial_points``. Should be one of
+
+        - "sb": The Steinberger low-discrepancy sequence
+        - "r2": The R2 sequence (works well for up to two parameters)
+        - "random" or None: Uniform random sampling
+
     gp_kernel : kernel object
         The kernel specifying the covariance function of the GP. If None is
         passed, a suitable default kernel is constructed.
@@ -118,7 +122,7 @@ class Optimizer(object):
         dimensions,
         n_points=500,
         n_initial_points=10,
-        init_strategy="r2",
+        init_strategy="sb",
         gp_kernel=None,
         gp_kwargs=None,
         gp_priors=None,
@@ -145,6 +149,8 @@ class Optimizer(object):
             self._initial_points = self.space.inverse_transform(
                 r2_sequence(n=n_initial_points, d=self.space.n_dims)
             )
+        elif self.init_strategy == "sb":
+            self._init_rng = np.random.RandomState(self.rng.randint(2 ** 31))
         self.n_points = n_points
 
         if gp_kwargs is None:
@@ -196,12 +202,23 @@ class Optimizer(object):
             raise NotImplementedError(
                 "Returning multiple points is not implemented yet."
             )
-        if (
-            self._n_initial_points > 0
-        ):  # TODO: Make sure estimator is trained here always
+        if self._n_initial_points > 0:
             if self.init_strategy == "r2":
                 return self._initial_points[self._n_initial_points - 1]
-            return self.space.rvs()
+            elif self.init_strategy == "sb":
+                existing_points = (
+                    self.space.transform(self.Xi) if len(self.Xi) > 0 else None
+                )
+                points = sb_sequence(
+                    n=len(self.Xi) + 1,
+                    d=self.space.transformed_n_dims,
+                    existing_points=existing_points,
+                    random_state=self._init_rng.randint(2 ** 31),
+                )
+                return self.space.inverse_transform(
+                    np.atleast_2d(points[len(self.Xi)])
+                )[0]
+            return self.space.rvs()[0]
         else:
             if not self.gp.kernel_:
                 raise RuntimeError(

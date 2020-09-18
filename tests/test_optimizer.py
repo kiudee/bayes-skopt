@@ -26,17 +26,23 @@ def test_multiple_asks():
     assert_equal(opt.ask(), opt.ask())
 
 
-def test_initial_points():
-    opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5)
+@pytest.mark.parametrize("init_strategy", ("r2", "sb", "random"))
+def test_initial_points(init_strategy):
+    opt = Optimizer(
+        dimensions=[(-2.0, 2.0)], n_initial_points=3, init_strategy=init_strategy
+    )
     x = opt.ask()
+    assert not isinstance(x[0], list)
     opt.tell([x], [0.0])
     assert opt._n_initial_points == opt.n_initial_points_ - 1
 
     opt.tell([x], [0.0])
     assert opt._n_initial_points == opt.n_initial_points_ - 2
+    assert opt.gp.chain_ is None
 
     opt.tell([[0.1], [0.2], [0.3]], [0.0, 0.1, 0.2], replace=True)
     assert opt._n_initial_points == opt.n_initial_points_ - 3
+    assert opt.gp.chain_ is not None
 
 
 def test_noise_vector():

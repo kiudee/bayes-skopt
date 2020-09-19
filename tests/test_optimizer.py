@@ -26,31 +26,35 @@ def test_multiple_asks():
     assert_equal(opt.ask(), opt.ask())
 
 
-def test_initial_points():
-    opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5)
+@pytest.mark.parametrize("init_strategy", ("r2", "sb", "random"))
+def test_initial_points(init_strategy):
+    opt = Optimizer(
+        dimensions=[(-2.0, 2.0)], n_initial_points=3, init_strategy=init_strategy
+    )
     x = opt.ask()
+    assert not isinstance(x[0], list)
     opt.tell([x], [0.0])
     assert opt._n_initial_points == opt.n_initial_points_ - 1
 
     opt.tell([x], [0.0])
     assert opt._n_initial_points == opt.n_initial_points_ - 2
+    assert opt.gp.chain_ is None
 
     opt.tell([[0.1], [0.2], [0.3]], [0.0, 0.1, 0.2], replace=True)
     assert opt._n_initial_points == opt.n_initial_points_ - 3
+    assert opt.gp.chain_ is not None
 
 
 def test_noise_vector():
     opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5)
     opt.tell(
-        [[-1.0], [0.0], [1.0], [0.5]],
-        [0.0, -1.0, 0.0, -1.0],
-        noise_vector=[1.0, 1.0, 1.0, 0.0],
+        [[-2.0], [-1.0], [0.0], [1.0], [2.0]],
+        [0.0, -1.0, 0.0, -1.0, 0.0],
+        noise_vector=[1.0, 1.0, 1.0, 0.0, 1.0],
     )
-    x = opt.ask()
-    opt.tell([x], [0.0])
-    # Test, if the less noisy optimum (at 0.5) had a stronger impact on the mean process
-    # than the noisy optimum (at 0.0):
-    y_noisy, y = opt.gp.predict([[0.5], [0.625]])
+    # Test, if the less noisy optimum (at 1.0) had a stronger impact on the mean process
+    # than the noisy optimum (at -1.0):
+    y_noisy, y = opt.gp.predict([[-1.0], [1.0]])
     assert y_noisy > y
 
     # Check, if passing a single point works correctly:
@@ -81,7 +85,7 @@ def test_error_on_invalid_priors():
     "input,expected",
     [
         (dict(normalized_scores=False, threshold=1.0), 0.995),
-        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.99, 0.935)),
+        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.97, 0.9)),
         (dict(normalized_scores=True, threshold=1.0), 0.99),
     ],
 )
@@ -105,7 +109,7 @@ def test_probability_of_improvement(random_state, input, expected):
     "input,expected",
     [
         (dict(normalized_scores=False, use_mean_gp=True), 0.2),
-        (dict(normalized_scores=True, use_mean_gp=True), 0.16),
+        (dict(normalized_scores=True, use_mean_gp=True), 0.14),
         (dict(normalized_scores=True, use_mean_gp=False), 0.17),
     ],
 )

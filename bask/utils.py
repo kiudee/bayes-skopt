@@ -5,6 +5,8 @@ from scipy.spatial.distance import cdist, euclidean
 from scipy.stats import halfnorm
 from skopt.learning.gaussian_process.kernels import ConstantKernel, Matern
 
+# We import r2_sequence here for backwards compatibility reasons:
+from bask.init import r2_sequence
 from bask.priors import make_roundflat
 
 __all__ = [
@@ -168,45 +170,6 @@ def guess_priors(kernel):
     priors = []
     _recursive_priors(kernel, priors)
     return priors
-
-
-def phi(d, n_iter=10):
-    if d == 1:
-        return 1.61803398874989484820458683436563
-    elif d == 2:
-        return 1.32471795724474602596090885447809
-    x = 2.0000
-    for _ in range(n_iter):
-        x = pow(1 + x, 1 / (d + 1))
-    return x
-
-
-def r2_sequence(n, d, seed=0.5):
-    """Output ``n`` points of the infinite R2 quasi-random sequence.
-
-    Parameters
-    ----------
-    n : int
-        Number of points to generate
-    d : int
-        Number of dimensions for each point
-    seed : float in [0, 1], default=0.5
-        Seed value for the sequence
-
-    Returns
-    -------
-    z : ndarray, shape (n, d)
-        ``n`` points of the R2 sequence
-    """
-    g = phi(d)
-    alpha = np.zeros(d)
-    for j in range(d):
-        alpha[j] = pow(1 / g, j + 1) % 1
-    z = np.zeros((n, d))
-
-    for i in range(n):
-        z[i] = (seed + alpha * (i + 1)) % 1
-    return z
 
 
 class _NoOpPBar(object):

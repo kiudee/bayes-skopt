@@ -6,6 +6,7 @@ __version__ = "0.9.3"
 
 from .acquisition import *
 from .bayesgpr import BayesGPR
+from .init import r2_sequence, sb_sequence
 from .optimizer import Optimizer
 from .searchcv import BayesSearchCV
 from .utils import guess_priors
@@ -21,6 +22,8 @@ __all__ = [
     "Expectation",
     "LCB",
     "MaxValueSearch",
+    "r2_sequence",
+    "sb_sequence",
     "ThompsonSampling",
     "VarianceReduction",
     "PVRS",

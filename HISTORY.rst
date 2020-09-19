@@ -2,6 +2,11 @@
 History
 =======
 
+0.10.0 (2020-09-19)
+-------------------
+* Add new initialization using the Steinerberger sequence. This works better
+  in high-dimensional problems than the R2 sequence.
+
 0.9.3 (2020-09-14)
 ------------------
 * Make default priors for input warping more focused on the identity transform.

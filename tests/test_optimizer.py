@@ -48,15 +48,13 @@ def test_initial_points(init_strategy):
 def test_noise_vector():
     opt = Optimizer(dimensions=[(-2.0, 2.0)], n_initial_points=5)
     opt.tell(
-        [[-1.0], [0.0], [1.0], [0.5]],
-        [0.0, -1.0, 0.0, -1.0],
-        noise_vector=[1.0, 1.0, 1.0, 0.0],
+        [[-2.0], [-1.0], [0.0], [1.0], [2.0]],
+        [0.0, -1.0, 0.0, -1.0, 0.0],
+        noise_vector=[1.0, 1.0, 1.0, 0.0, 1.0],
     )
-    x = opt.ask()
-    opt.tell([x], [0.0])
-    # Test, if the less noisy optimum (at 0.5) had a stronger impact on the mean process
-    # than the noisy optimum (at 0.0):
-    y_noisy, y = opt.gp.predict([[0.5], [0.625]])
+    # Test, if the less noisy optimum (at 1.0) had a stronger impact on the mean process
+    # than the noisy optimum (at -1.0):
+    y_noisy, y = opt.gp.predict([[-1.0], [1.0]])
     assert y_noisy > y
 
     # Check, if passing a single point works correctly:
@@ -87,7 +85,7 @@ def test_error_on_invalid_priors():
     "input,expected",
     [
         (dict(normalized_scores=False, threshold=1.0), 0.995),
-        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.99, 0.935)),
+        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.97, 0.9)),
         (dict(normalized_scores=True, threshold=1.0), 0.99),
     ],
 )
@@ -111,7 +109,7 @@ def test_probability_of_improvement(random_state, input, expected):
     "input,expected",
     [
         (dict(normalized_scores=False, use_mean_gp=True), 0.2),
-        (dict(normalized_scores=True, use_mean_gp=True), 0.16),
+        (dict(normalized_scores=True, use_mean_gp=True), 0.14),
         (dict(normalized_scores=True, use_mean_gp=False), 0.17),
     ],
 )

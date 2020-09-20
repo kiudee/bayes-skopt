@@ -2,7 +2,7 @@
 
 __author__ = """Karlson Pfannschmidt"""
 __email__ = "kiudee@mail.upb.de"
-__version__ = "0.9.3"
+__version__ = "0.10.0"
 
 from .acquisition import *
 from .bayesgpr import BayesGPR

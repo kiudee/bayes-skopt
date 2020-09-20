@@ -85,7 +85,7 @@ class BayesGPR(GaussianProcessRegressor):
         from the space of allowed theta-values. If greater than 0, all bounds
         must be finite. Note that n_restarts_optimizer == 0 implies that one
         run is performed.
-    normalize_y : boolean, optional (default: True)
+    normalize_y : boolean, optional (default: False)
         Whether the target values y are normalized, i.e., the mean of the
         observed target values become zero. This parameter should be set to
         True if the target values' mean is expected to differ considerable from
@@ -151,7 +151,7 @@ class BayesGPR(GaussianProcessRegressor):
         alpha=1e-10,
         optimizer="fmin_l_bfgs_b",
         n_restarts_optimizer=0,
-        normalize_y=True,
+        normalize_y=False,
         warp_inputs=False,
         copy_X_train=True,
         random_state=None,

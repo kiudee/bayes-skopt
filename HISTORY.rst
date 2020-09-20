@@ -2,10 +2,11 @@
 History
 =======
 
-0.10.0 (2020-09-19)
+0.10.0 (2020-09-20)
 -------------------
 * Add new initialization using the Steinerberger sequence. This works better
   in high-dimensional problems than the R2 sequence.
+* Fix exception when a categorical parameter is Iterable.
 
 0.9.3 (2020-09-14)
 ------------------

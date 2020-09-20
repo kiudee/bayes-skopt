@@ -84,8 +84,8 @@ def test_error_on_invalid_priors():
 @pytest.mark.parametrize(
     "input,expected",
     [
-        (dict(normalized_scores=False, threshold=1.0), 0.995),
-        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.97, 0.9)),
+        (dict(normalized_scores=False, threshold=1.0), 0.94),
+        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.92, 0.81)),
         (dict(normalized_scores=True, threshold=1.0), 0.99),
     ],
 )
@@ -108,9 +108,9 @@ def test_probability_of_improvement(random_state, input, expected):
 @pytest.mark.parametrize(
     "input,expected",
     [
-        (dict(normalized_scores=False, use_mean_gp=True), 0.2),
-        (dict(normalized_scores=True, use_mean_gp=True), 0.14),
-        (dict(normalized_scores=True, use_mean_gp=False), 0.17),
+        (dict(normalized_scores=False, use_mean_gp=True), 0.3),
+        (dict(normalized_scores=True, use_mean_gp=True), 0.25),
+        (dict(normalized_scores=True, use_mean_gp=False), 0.29),
     ],
 )
 def test_expected_optimality_gap(random_state, input, expected):

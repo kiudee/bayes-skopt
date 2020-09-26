@@ -2,6 +2,10 @@
 History
 =======
 
+0.10.1 (2020-09-26)
+-------------------
+* Bump minimum arviz version to 0.10.0.
+
 0.10.0 (2020-09-20)
 -------------------
 * Add new initialization using the Steinerberger sequence. This works better

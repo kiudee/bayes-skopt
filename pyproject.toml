@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bask"
-version = "0.10.1"
+version = "0.10.2"
 description = "A fully Bayesian implementation of sequential model-based optimization"
 authors = ["Karlson Pfannschmidt <kiudee@mail.upb.de>"]
 license = "Apache-2.0"

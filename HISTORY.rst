@@ -2,6 +2,11 @@
 History
 =======
 
+0.10.2 (2020-09-28)
+-------------------
+* Fix divide by zero encountered in log when evaluating acquisition functions
+  without noise.
+
 0.10.1 (2020-09-26)
 -------------------
 * Bump minimum arviz version to 0.10.0.

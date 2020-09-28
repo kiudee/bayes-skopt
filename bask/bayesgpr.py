@@ -652,6 +652,7 @@ class BayesGPR(GaussianProcessRegressor):
             current_warp_alphas = np.copy(self.warp_alphas_)
             current_warp_betas = np.copy(self.warp_betas_)
         current_theta = self.theta
+        n_dims = len(current_theta)
         current_K_inv = np.copy(self.K_inv_)
         current_L = np.copy(self.L_)
         current_alpha = np.copy(self.alpha_)
@@ -659,8 +660,8 @@ class BayesGPR(GaussianProcessRegressor):
         for i, j in enumerate(ind):
             if self.warp_inputs:
                 validate_zeroone(X)
-                theta = self.chain_[j][: len(self.kernel_.theta)]
-                warp_params = self.chain_[j][len(self.kernel_.theta) :]
+                theta = self.chain_[j][:n_dims]
+                warp_params = self.chain_[j][n_dims:]
                 alphas, betas = warp_params[: X.shape[1]], warp_params[X.shape[1] :]
                 self.create_warpers(alphas, betas)
                 self.rewarp()

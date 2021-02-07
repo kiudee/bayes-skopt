@@ -2,6 +2,12 @@
 History
 =======
 
+0.10.3 (2021-02-07)
+-------------------
+* Fix a bug where the output ``y`` was not correctly normalized when passed to
+  ``BayesGPR.sample(...)``.
+* Fix not adjusting ``noise_vector`` when ``normalize_y=True``.
+
 0.10.2 (2020-09-28)
 -------------------
 * Fix divide by zero encountered in log when evaluating acquisition functions

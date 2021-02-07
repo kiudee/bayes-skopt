@@ -590,6 +590,11 @@ class BayesGPR(GaussianProcessRegressor):
 
         """
         self.kernel = self._kernel
+        # In sklearn >= 23 the normalization includes scaling the output by the
+        # standard deviation. We need to scale the noise_vector accordingly here:
+        if int(sklearn.__version__[2:4]) >= 23 and self.normalize_y:
+            y_std = np.std(y, axis=0)
+            noise_vector = np.array(noise_vector) / np.power(y_std, 2)
         self._apply_noise_vector(len(y), noise_vector)
         super().fit(X, y)
 

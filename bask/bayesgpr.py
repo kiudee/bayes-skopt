@@ -5,6 +5,7 @@ import emcee as mc
 import numpy as np
 import scipy.stats as st
 from scipy.linalg import cho_solve, cholesky, solve_triangular
+import sklearn
 from sklearn.utils import check_random_state
 from skopt.learning import GaussianProcessRegressor
 from skopt.learning.gaussian_process.gpr import _param_for_white_kernel_in_Sum
@@ -458,10 +459,23 @@ class BayesGPR(GaussianProcessRegressor):
         # Update data, if available:
         if X is not None:
             if self.normalize_y:
-                self.y_train_mean_ = np.mean(y, axis=0)
-                y = y - self.y_train_mean_
+                self._y_train_mean = np.mean(y, axis=0)
+                if int(sklearn.__version__[2:4]) >= 23:
+                    self._y_train_std = np.std(y, axis=0)
             else:
-                self.y_train_mean_ = np.zeros(1)
+                self._y_train_mean = np.zeros(1)
+                if int(sklearn.__version__[2:4]) >= 23:
+                    self._y_train_std = 1
+            if int(sklearn.__version__[2:4]) >= 23:
+                self.y_train_std_ = self._y_train_std
+                self.y_train_mean_ = self._y_train_mean
+            else:
+                self.y_train_mean_ = self._y_train_mean
+                self.y_train_std_ = 1
+            y = (y - self.y_train_mean_) / self.y_train_std_
+
+            if noise_vector is not None:
+                noise_vector = np.array(noise_vector) / np.power(self.y_train_std_, 2)
 
             self.X_train_ = np.copy(X) if self.copy_X_train else X
             self.y_train_ = np.copy(y) if self.copy_X_train else y

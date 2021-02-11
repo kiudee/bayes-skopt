@@ -308,10 +308,12 @@ class PVRS(FullGPAcquisition):
         thompson_sample = gp.sample_y(
             X, sample_mean=True, n_samples=n_thompson, random_state=random_state
         )
-        thompson_points = np.array(X)[np.argmin(thompson_sample, axis=0)]
-        covs = np.empty(n)
+        # gp.sample_y internally warps the inputs, but now we need to first warp X
+        # such that the thompson_points are considered in the warped space:
         if gp.warp_inputs:
             X = gp.warp(X)
+        thompson_points = np.array(X)[np.argmin(thompson_sample, axis=0)]
+        covs = np.empty(n)
         for i in range(n):
             X_train_aug = np.concatenate([gp.X_train_, [X[i]]])
             K = gp.kernel_(X_train_aug)

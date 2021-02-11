@@ -2,6 +2,11 @@
 History
 =======
 
+0.10.4 (2021-02-11)
+-------------------
+* Fix a bug in the predictive variance reduction search (PVRS) acquisition
+  function, where the inputs were not warped correctly.
+
 0.10.3 (2021-02-07)
 -------------------
 * Fix a bug where the output ``y`` was not correctly normalized when passed to

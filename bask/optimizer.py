@@ -205,7 +205,7 @@ class Optimizer(object):
         if self._n_initial_points > 0:
             if self.init_strategy == "r2":
                 return self._initial_points[self._n_initial_points - 1]
-            elif self.init_strategy == "sb":
+            if self.init_strategy == "sb":
                 existing_points = (
                     self.space.transform(self.Xi) if len(self.Xi) > 0 else None
                 )
@@ -219,12 +219,11 @@ class Optimizer(object):
                     np.atleast_2d(points[len(self.Xi)])
                 )[0]
             return self.space.rvs()[0]
-        else:
-            if not self.gp.kernel_:
-                raise RuntimeError(
-                    "Initialization is finished, but no model has been fit."
-                )
-            return self._next_x
+        if not self.gp.kernel_:
+            raise RuntimeError(
+                "Initialization is finished, but no model has been fit."
+            )
+        return self._next_x
 
     def tell(
         self,

@@ -199,8 +199,7 @@ def get_progress_bar(display, total):
     """
     if display is True:
         return tqdm.tqdm(total=total)  # noqa: F821
-    else:
-        return _NoOpPBar()
+    return _NoOpPBar()
 
 
 def validate_zeroone(arr):

@@ -220,4 +220,3 @@ def validate_zeroone(arr):
         arr = np.array(arr)
     if np.any(arr < 0) or np.any(arr > 1):
         raise ValueError("Not all values of the array are between 0 and 1.")
-    return

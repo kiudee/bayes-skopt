@@ -138,7 +138,7 @@ class Optimizer(object):
         else:
             self.acq_func = ACQUISITION_FUNC[acq_func]
         if acq_func_kwargs is None:
-            acq_func_kwargs = dict()
+            acq_func_kwargs = {}
         self.acq_func_kwargs = acq_func_kwargs
 
         self.space = normalize_dimensions(dimensions)
@@ -154,7 +154,7 @@ class Optimizer(object):
         self.n_points = n_points
 
         if gp_kwargs is None:
-            gp_kwargs = dict()
+            gp_kwargs = {}
         if gp_kernel is None:
             # For now the default kernel is not adapted to the dimensions,
             # which is why a simple list is passed:

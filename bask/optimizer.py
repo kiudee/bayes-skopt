@@ -32,7 +32,7 @@ ACQUISITION_FUNC = {
 }
 
 
-class Optimizer(object):
+class Optimizer():
     """Execute a stepwise Bayesian optimization.
 
     Parameters

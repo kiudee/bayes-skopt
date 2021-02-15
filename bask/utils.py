@@ -172,7 +172,7 @@ def guess_priors(kernel):
     return priors
 
 
-class _NoOpPBar(object):
+class _NoOpPBar():
     """This class implements the progress bar interface but does nothing"""
 
     def __init__(self):

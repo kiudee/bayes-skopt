@@ -2,6 +2,12 @@
 History
 =======
 
+0.10.5 (2021-03-11)
+-------------------
+* Fix ``BayesGPR.sample_y(...)`` applying input warping twice. This also
+  fixes incorrect behavior by ``PVRS``, ``ThompsonSampling`` and
+  ``VarianceReduction``.
+
 0.10.4 (2021-02-11)
 -------------------
 * Fix a bug in the predictive variance reduction search (PVRS) acquisition

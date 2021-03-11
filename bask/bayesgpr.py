@@ -666,8 +666,6 @@ class BayesGPR(GaussianProcessRegressor):
             else:
                 cm = self.noise_set_to_zero()
             with cm:
-                if self.warp_inputs:
-                    X = self.warp(X)
                 samples = super().sample_y(X, n_samples=n_samples, random_state=rng)
             return samples
         ind = rng.choice(len(self.chain_), size=n_samples, replace=True)
@@ -688,7 +686,6 @@ class BayesGPR(GaussianProcessRegressor):
                 alphas, betas = warp_params[: X.shape[1]], warp_params[X.shape[1] :]
                 self.create_warpers(alphas, betas)
                 self.rewarp()
-                X = self.warp(X)
             else:
                 theta = self.chain_[j]
             self.theta = theta

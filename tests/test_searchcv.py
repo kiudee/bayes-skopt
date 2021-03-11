@@ -22,10 +22,11 @@ def test_searchcv_run():
         },
         n_iter=11,
         cv=None,
+        random_state=0,
     )
 
     opt.fit(X_train, y_train)
-    assert opt.score(X_test, y_test) > 0.9
+    assert opt.score(X_test, y_test) > 0.89
 
 
 def test_searchcv_best_mean():
@@ -45,7 +46,8 @@ def test_searchcv_best_mean():
         n_iter=11,
         cv=None,
         return_policy="best_mean",
+        random_state=0,
     )
 
     opt.fit(X_train, y_train)
-    assert opt.score(X_test, y_test) > 0.9
+    assert opt.score(X_test, y_test) > 0.89

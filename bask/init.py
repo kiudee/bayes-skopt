@@ -92,7 +92,7 @@ def sb_sequence(n, d, existing_points=None, random_state=None, restarts=20):
 def phi(d, n_iter=10):
     if d == 1:
         return 1.61803398874989484820458683436563
-    elif d == 2:
+    if d == 2:
         return 1.32471795724474602596090885447809
     x = 2.0000
     for _ in range(n_iter):

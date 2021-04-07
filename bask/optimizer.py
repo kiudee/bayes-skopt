@@ -32,7 +32,7 @@ ACQUISITION_FUNC = {
 }
 
 
-class Optimizer(object):
+class Optimizer():
     """Execute a stepwise Bayesian optimization.
 
     Parameters
@@ -138,7 +138,7 @@ class Optimizer(object):
         else:
             self.acq_func = ACQUISITION_FUNC[acq_func]
         if acq_func_kwargs is None:
-            acq_func_kwargs = dict()
+            acq_func_kwargs = {}
         self.acq_func_kwargs = acq_func_kwargs
 
         self.space = normalize_dimensions(dimensions)
@@ -154,7 +154,7 @@ class Optimizer(object):
         self.n_points = n_points
 
         if gp_kwargs is None:
-            gp_kwargs = dict()
+            gp_kwargs = {}
         if gp_kernel is None:
             # For now the default kernel is not adapted to the dimensions,
             # which is why a simple list is passed:
@@ -205,7 +205,7 @@ class Optimizer(object):
         if self._n_initial_points > 0:
             if self.init_strategy == "r2":
                 return self._initial_points[self._n_initial_points - 1]
-            elif self.init_strategy == "sb":
+            if self.init_strategy == "sb":
                 existing_points = (
                     self.space.transform(self.Xi) if len(self.Xi) > 0 else None
                 )
@@ -219,12 +219,11 @@ class Optimizer(object):
                     np.atleast_2d(points[len(self.Xi)])
                 )[0]
             return self.space.rvs()[0]
-        else:
-            if not self.gp.kernel_:
-                raise RuntimeError(
-                    "Initialization is finished, but no model has been fit."
-                )
-            return self._next_x
+        if not self.gp.kernel_:
+            raise RuntimeError(
+                "Initialization is finished, but no model has been fit."
+            )
+        return self._next_x
 
     def tell(
         self,

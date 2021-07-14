@@ -365,6 +365,7 @@ class BayesSearchCV(BayesSearchCVSK):
                 return np.array(item).item()
             except ValueError:
                 return item
+
         params = [[try_convert_to_np(v) for v in p] for p in params]
 
         # make lists into dictionaries

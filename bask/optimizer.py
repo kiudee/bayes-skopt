@@ -32,7 +32,7 @@ ACQUISITION_FUNC = {
 }
 
 
-class Optimizer():
+class Optimizer:
     """Execute a stepwise Bayesian optimization.
 
     Parameters
@@ -220,9 +220,7 @@ class Optimizer():
                 )[0]
             return self.space.rvs()[0]
         if not self.gp.kernel_:
-            raise RuntimeError(
-                "Initialization is finished, but no model has been fit."
-            )
+            raise RuntimeError("Initialization is finished, but no model has been fit.")
         return self._next_x
 
     def tell(

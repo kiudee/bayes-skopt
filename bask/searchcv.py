@@ -1,7 +1,7 @@
 try:
-    from collections.abc import Iterable, Sized
+    from collections.abc import Iterable
 except ImportError:
-    from collections import Sized, Iterable
+    from collections import Iterable
 
 import logging
 
@@ -365,6 +365,7 @@ class BayesSearchCV(BayesSearchCVSK):
                 return np.array(item).item()
             except ValueError:
                 return item
+
         params = [[try_convert_to_np(v) for v in p] for p in params]
 
         # make lists into dictionaries

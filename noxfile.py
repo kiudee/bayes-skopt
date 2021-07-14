@@ -3,7 +3,7 @@ from pathlib import Path
 from textwrap import dedent
 
 import nox
-from nox_poetry import session
+from nox_poetry import session as noxsession
 
 locations = "bask", "noxfile.py"
 nox.options.sessions = ("pre-commit", "tests")
@@ -59,7 +59,7 @@ def activate_virtualenv_in_precommit_hooks(session):
         hook.write_text("\n".join(lines))
 
 
-@session(python=python_versions)
+@noxsession(python=python_versions)
 def tests(session):
     """Run the test suite."""
     session.install(".[data]")
@@ -67,7 +67,7 @@ def tests(session):
     session.run("pytest", *session.posargs)
 
 
-@session(python="3.9")
+@noxsession(python="3.9")
 def black(session):
     """Run black code formatter."""
     args = session.posargs or locations
@@ -75,7 +75,7 @@ def black(session):
     session.run("black", *args)
 
 
-@session(name="pre-commit", python="3.9")
+@noxsession(name="pre-commit", python="3.9")
 def precommit(session):
     args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
     session.install(

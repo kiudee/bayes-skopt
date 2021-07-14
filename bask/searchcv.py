@@ -1,7 +1,7 @@
 try:
-    from collections.abc import Iterable, Sized
+    from collections.abc import Iterable
 except ImportError:
-    from collections import Sized, Iterable
+    from collections import Iterable
 
 import logging
 

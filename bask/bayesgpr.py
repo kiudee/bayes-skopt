@@ -484,7 +484,7 @@ class BayesGPR(GaussianProcessRegressor):
 
         n_dim = len(self.theta)
         n_walkers = n_threads * n_walkers_per_thread
-        n_samples = np.ceil(n_desired_samples / n_walkers) + n_burnin
+        n_samples = int(np.ceil(n_desired_samples / n_walkers) + n_burnin)
         pos = None
         if position is not None:
             pos = position

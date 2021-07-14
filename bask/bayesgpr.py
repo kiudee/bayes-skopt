@@ -4,8 +4,8 @@ from contextlib import contextmanager, nullcontext
 import emcee as mc
 import numpy as np
 import scipy.stats as st
-from scipy.linalg import cho_solve, cholesky, solve_triangular
 import sklearn
+from scipy.linalg import cho_solve, cholesky, solve_triangular
 from sklearn.utils import check_random_state
 from skopt.learning import GaussianProcessRegressor
 from skopt.learning.gaussian_process.gpr import _param_for_white_kernel_in_Sum

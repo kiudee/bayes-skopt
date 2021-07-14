@@ -2,6 +2,11 @@
 History
 =======
 
+0.10.6 (2021-07-14)
+-------------------
+* Fix a crash resulting from bask passing a ``numpy.float64`` value where
+  an ``int`` was expected.
+
 0.10.5 (2021-03-11)
 -------------------
 * Fix ``BayesGPR.sample_y(...)`` applying input warping twice. This also

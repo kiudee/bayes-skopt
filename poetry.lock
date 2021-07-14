@@ -154,14 +154,6 @@ six = ">=1.9.0"
 webencodings = "*"
 
 [[package]]
-name = "bump2version"
-version = "1.0.1"
-description = "Version-bump your software with a single command!"
-category = "dev"
-optional = false
-python-versions = ">=3.5"
-
-[[package]]
 name = "certifi"
 version = "2021.5.30"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -1606,7 +1598,7 @@ docs = ["Sphinx", "numpydoc", "nbsphinx", "nbsphinx-link"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "13da7a1c6ead9f224ea9a74c80df515014339a8ddf4198e41fc9a1f2a0641e4b"
+content-hash = "5a0985ce5e7985590e1cc4313d3bc8a272ba05130218205d1efb84da608a0002"
 
 [metadata.files]
 alabaster = [
@@ -1660,10 +1652,6 @@ black = [
 bleach = [
     {file = "bleach-3.3.0-py2.py3-none-any.whl", hash = "sha256:6123ddc1052673e52bab52cdc955bcb57a015264a1c57d37bea2f6b817af0125"},
     {file = "bleach-3.3.0.tar.gz", hash = "sha256:98b3170739e5e83dd9dc19633f074727ad848cbedb6026708c8ac2d3b697a433"},
-]
-bump2version = [
-    {file = "bump2version-1.0.1-py2.py3-none-any.whl", hash = "sha256:37f927ea17cde7ae2d7baf832f8e80ce3777624554a653006c9144f8017fe410"},
-    {file = "bump2version-1.0.1.tar.gz", hash = "sha256:762cb2bfad61f4ec8e2bdf452c7c267416f8c70dd9ecb1653fd0bbb01fa936e6"},
 ]
 certifi = [
     {file = "certifi-2021.5.30-py2.py3-none-any.whl", hash = "sha256:50b1e4f8446b06f41be7dd6338db18e0990601dce795c2b1686458aa7e8fa7d8"},

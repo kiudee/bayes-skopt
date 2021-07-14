@@ -41,7 +41,6 @@ bump2version = "^1.0.0"
 wheel = "^0.34.2"
 watchdog = "^0.10.3"
 flake8 = "^3.8.3"
-tox = "^3.18.1"
 coverage = "^5.2.1"
 Sphinx = "^3.1.2"
 nbsphinx = "^0.7.1"
@@ -56,6 +55,8 @@ black = "^19.10b0"
 isort = "^5.3.0"
 pre-commit = "^2.6.0"
 flake8-bugbear = "^20.1.4"
+nox = "^2021.6.12"
+nox-poetry = "^0.8.6"
 
 [tool.poetry.extras]
 docs = ["Sphinx", "numpydoc", "nbsphinx", "nbsphinx-link"]

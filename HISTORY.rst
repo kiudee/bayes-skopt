@@ -2,7 +2,7 @@
 History
 =======
 
-0.10.6 (2021-07-14)
+0.10.6 (2021-07-15)
 -------------------
 * Fix a crash resulting from bask passing a ``numpy.float64`` value where
   an ``int`` was expected.

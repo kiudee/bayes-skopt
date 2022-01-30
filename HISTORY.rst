@@ -2,6 +2,11 @@
 History
 =======
 
+0.10.7 (2022-01-29)
+-------------------
+* Expand version range for importlib_metadata to be compatible with other
+  libraries.
+
 0.10.6 (2021-07-15)
 -------------------
 * Fix a crash resulting from bask passing a ``numpy.float64`` value where

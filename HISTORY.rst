@@ -2,7 +2,7 @@
 History
 =======
 
-0.10.7 (2022-01-29)
+0.10.7 (2022-01-30)
 -------------------
 * Expand version range for importlib_metadata to be compatible with other
   libraries.

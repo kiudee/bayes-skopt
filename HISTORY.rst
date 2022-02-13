@@ -2,6 +2,12 @@
 History
 =======
 
+0.10.8 (2022-02-13)
+-------------------
+* Remove dependency Click, since it was not used.
+* Widen dependency ranges, where appropriate, to make the library easier to
+  install.
+
 0.10.7 (2022-01-30)
 -------------------
 * Expand version range for importlib_metadata to be compatible with other

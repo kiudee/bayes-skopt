@@ -2,7 +2,7 @@
 History
 =======
 
-0.10.8 (2022-02-13)
+0.10.8 (2022-04-02)
 -------------------
 * Remove dependency Click, since it was not used.
 * Widen dependency ranges, where appropriate, to make the library easier to

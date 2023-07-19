@@ -1,15 +1,6 @@
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
-
-import logging
-
 import numpy as np
-from scipy.stats import rankdata
-from sklearn.utils.validation import check_is_fitted
 from skopt import BayesSearchCV as BayesSearchCVSK
-from skopt.utils import create_result, dimensions_aslist, expected_minimum, point_asdict
+from skopt.utils import dimensions_aslist, point_asdict
 
 from bask.optimizer import Optimizer
 
@@ -324,86 +315,22 @@ class BayesSearchCV(BayesSearchCVSK):
 
         return optimizer
 
-    @property
-    def best_params_(self):
-        check_is_fitted(self, "cv_results_")
-        if self.return_policy == "best_setting" or len(self.optimizers_) > 1:
-            if len(self.optimizers_) > 1:
-                logging.warning(
-                    "Return policy 'best_mean' is incompatible with multiple search"
-                    "spaces. Reverting to 'best_setting'."
-                )
-            return self.cv_results_["params"][self.best_index_]
-        if self.return_policy == "best_mean":
-            random_state = self.optimizer_kwargs_["random_state"]
-            # We construct a result object manually here, since in skopt versions up to
-            # 0.7.4 they were not saved yet:
-            opt = self.optimizers_[0]
-            result_object = create_result(
-                opt.Xi, opt.yi, space=opt.space, rng=random_state, models=[opt.gp]
-            )
-            point, _ = expected_minimum(
-                res=result_object, n_random_starts=100, random_state=random_state,
-            )
-            dict = point_asdict(self.search_spaces, point)
-            return dict
-
-    def _step(self, X, y, search_space, optimizer, groups=None, n_points=1):
+    def _step(self, search_space, optimizer, evaluate_candidates, n_points=1):
         """Generate n_jobs parameters and evaluate them in parallel."""
 
         # get parameter values to evaluate
-        # TODO: Until n_points is supported, we will wrap the return value in a list
         params = [optimizer.ask(n_points=n_points)]
 
         # convert parameters to python native types
-        # in case we have any Iterable parameters, we want to
-        # stop numpy from coercing them into an np.array
-        def try_convert_to_np(item):
-            if isinstance(item, Iterable):
-                return item
-            try:
-                return np.array(item).item()
-            except ValueError:
-                return item
-
-        params = [[try_convert_to_np(v) for v in p] for p in params]
+        params = [[np.array(v).item() for v in p] for p in params]
 
         # make lists into dictionaries
         params_dict = [point_asdict(search_space, p) for p in params]
 
-        # HACK: self.cv_results_ is reset at every call to _fit, keep current
-        all_cv_results = self.cv_results_
-
-        # HACK: this adds compatibility with different versions of sklearn
-        refit = self.refit
-        self.refit = False
-        self._fit(X, y, groups, params_dict)
-        self.refit = refit
-
-        # merge existing and new cv_results_
-        for k in self.cv_results_:
-            all_cv_results[k].extend(self.cv_results_[k])
-
-        all_cv_results["rank_test_score"] = list(
-            np.asarray(
-                rankdata(-np.array(all_cv_results["mean_test_score"]), method="min"),
-                dtype=np.int32,
-            )
-        )
-        if self.return_train_score:
-            all_cv_results["rank_train_score"] = list(
-                np.asarray(
-                    rankdata(
-                        -np.array(all_cv_results["mean_train_score"]), method="min"
-                    ),
-                    dtype=np.int32,
-                )
-            )
-        self.cv_results_ = all_cv_results
-        self.best_index_ = np.argmax(self.cv_results_["mean_test_score"])
-
-        # feed the point and objective back into optimizer
-        local_results = self.cv_results_["mean_test_score"][-len(params) :]
+        all_results = evaluate_candidates(params_dict)
+        # Feed the point and objective value back into optimizer
+        # Optimizer minimizes objective, hence provide negative score
+        local_results = all_results["mean_test_score"][-len(params) :]
 
         # optimizer minimizes objective, hence provide negative score
         return optimizer.tell(

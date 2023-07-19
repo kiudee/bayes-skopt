@@ -7,7 +7,7 @@ from bask.searchcv import BayesSearchCV
 
 
 def test_searchcv_run():
-    X, y = load_iris(True)
+    X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=0.75, random_state=0
     )
@@ -30,7 +30,7 @@ def test_searchcv_run():
 
 
 def test_searchcv_best_mean():
-    X, y = load_iris(True)
+    X, y = load_iris(return_X_y=True)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, train_size=0.75, random_state=0
     )

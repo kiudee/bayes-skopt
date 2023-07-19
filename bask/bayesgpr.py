@@ -584,10 +584,7 @@ class BayesGPR(GaussianProcessRegressor):
 
         """
         self.kernel = self._kernel
-        if (
-            self.normalize_y
-            and noise_vector is not None
-        ):
+        if self.normalize_y and noise_vector is not None:
             y_std = np.std(y, axis=0)
             noise_vector = np.array(noise_vector) / np.power(y_std, 2)
         self._apply_noise_vector(len(y), noise_vector)

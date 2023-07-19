@@ -460,18 +460,12 @@ class BayesGPR(GaussianProcessRegressor):
         if X is not None:
             if self.normalize_y:
                 self._y_train_mean = np.mean(y, axis=0)
-                if int(sklearn.__version__[2:4]) >= 23:
-                    self._y_train_std = np.std(y, axis=0)
+                self._y_train_std = np.std(y, axis=0)
             else:
                 self._y_train_mean = np.zeros(1)
-                if int(sklearn.__version__[2:4]) >= 23:
-                    self._y_train_std = 1
-            if int(sklearn.__version__[2:4]) >= 23:
-                self.y_train_std_ = self._y_train_std
-                self.y_train_mean_ = self._y_train_mean
-            else:
-                self.y_train_mean_ = self._y_train_mean
-                self.y_train_std_ = 1
+                self._y_train_std = 1
+            self.y_train_std_ = self._y_train_std
+            self.y_train_mean_ = self._y_train_mean
             y = (y - self.y_train_mean_) / self.y_train_std_
 
             if noise_vector is not None:
@@ -590,11 +584,8 @@ class BayesGPR(GaussianProcessRegressor):
 
         """
         self.kernel = self._kernel
-        # In sklearn >= 23 the normalization includes scaling the output by the
-        # standard deviation. We need to scale the noise_vector accordingly here:
         if (
-            int(sklearn.__version__[2:4]) >= 23
-            and self.normalize_y
+            self.normalize_y
             and noise_vector is not None
         ):
             y_std = np.std(y, axis=0)

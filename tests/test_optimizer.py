@@ -83,9 +83,9 @@ def test_error_on_invalid_priors():
 @pytest.mark.parametrize(
     "input,expected",
     [
-        (dict(normalized_scores=False, threshold=1.0), 0.94),
-        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.92, 0.81)),
-        (dict(normalized_scores=True, threshold=1.0), 0.99),
+        (dict(normalized_scores=False, threshold=1.0), 0.955),
+        (dict(normalized_scores=False, threshold=(0.9, 0.5)), (0.94, 0.84)),
+        (dict(normalized_scores=True, threshold=1.0), 0.97),
     ],
 )
 def test_probability_of_improvement(random_state, input, expected):

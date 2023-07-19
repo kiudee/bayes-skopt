@@ -1,15 +1,6 @@
-try:
-    from collections.abc import Iterable
-except ImportError:
-    from collections import Iterable
-
-import logging
-
 import numpy as np
-from scipy.stats import rankdata
-from sklearn.utils.validation import check_is_fitted
 from skopt import BayesSearchCV as BayesSearchCVSK
-from skopt.utils import create_result, dimensions_aslist, expected_minimum, point_asdict
+from skopt.utils import dimensions_aslist, point_asdict
 
 from bask.optimizer import Optimizer
 
@@ -323,30 +314,6 @@ class BayesSearchCV(BayesSearchCVSK):
             optimizer.space.dimensions[i].name = list(sorted(params_space.keys()))[i]
 
         return optimizer
-
-    # @property
-    # def best_params_(self):
-    #     check_is_fitted(self, "cv_results_")
-    #     if self.return_policy == "best_setting" or len(self.optimizers_) > 1:
-    #         if len(self.optimizers_) > 1:
-    #             logging.warning(
-    #                 "Return policy 'best_mean' is incompatible with multiple search"
-    #                 "spaces. Reverting to 'best_setting'."
-    #             )
-    #         return self.cv_results_["params"][self.best_index_]
-    #     if self.return_policy == "best_mean":
-    #         random_state = self.optimizer_kwargs_["random_state"]
-    #         # We construct a result object manually here, since in skopt versions up to
-    #         # 0.7.4 they were not saved yet:
-    #         opt = self.optimizers_[0]
-    #         result_object = create_result(
-    #             opt.Xi, opt.yi, space=opt.space, rng=random_state, models=[opt.gp]
-    #         )
-    #         point, _ = expected_minimum(
-    #             res=result_object, n_random_starts=100, random_state=random_state,
-    #         )
-    #         dict = point_asdict(self.search_spaces, point)
-    #         return dict
 
     def _step(self, search_space, optimizer, evaluate_candidates, n_points=1):
         """Generate n_jobs parameters and evaluate them in parallel."""

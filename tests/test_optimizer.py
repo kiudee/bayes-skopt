@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
-from numpy.testing import assert_almost_equal
-from sklearn.utils.testing import assert_equal
+from numpy.testing import assert_almost_equal, assert_equal
 from skopt.benchmarks import bench1
 
 from bask.optimizer import Optimizer

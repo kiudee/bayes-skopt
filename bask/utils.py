@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 
 import numpy as np
 from scipy.spatial.distance import cdist, euclidean
@@ -101,7 +101,7 @@ def _recursive_priors(kernel, prior_list):
             # For common optimization problems, we expect the lengthscales to
             # lie in the range [0.1, 0.6]. The round-flat prior allows values
             # outside the range, if supported by enough datapoints.
-            if isinstance(kernel.length_scale, (collections.Sequence, np.ndarray)):
+            if isinstance(kernel.length_scale, (collections.abc.Sequence, np.ndarray)):
                 n_priors = len(kernel.length_scale)
             else:
                 n_priors = 1

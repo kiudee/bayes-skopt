@@ -315,7 +315,9 @@ class BayesSearchCV(BayesSearchCVSK):
 
         return optimizer
 
-    def _step(self, search_space, optimizer, evaluate_candidates, n_points=1):
+    def _step(
+        self, search_space, optimizer, score_name, evaluate_candidates, n_points=1
+    ):
         """Generate n_jobs parameters and evaluate them in parallel."""
 
         # get parameter values to evaluate
@@ -333,7 +335,7 @@ class BayesSearchCV(BayesSearchCVSK):
         local_results = all_results["mean_test_score"][-len(params) :]
 
         # optimizer minimizes objective, hence provide negative score
-        return optimizer.tell(
+        optim_result = optimizer.tell(
             params,
             [-score for score in local_results],
             n_samples=self.n_samples,
@@ -341,3 +343,5 @@ class BayesSearchCV(BayesSearchCVSK):
             gp_burnin=self.gp_burnin,
             progress=False,
         )
+
+        return optim_result, score_name

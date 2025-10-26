@@ -383,7 +383,7 @@ class BayesGPR(GaussianProcessRegressor):
         warp_priors=None,
         position=None,
         add=False,
-        **kwargs
+        **kwargs,
     ):
         """Sample from the posterior distribution of the hyper-parameters.
 
@@ -500,7 +500,7 @@ class BayesGPR(GaussianProcessRegressor):
             log_prob_fn=self._log_prob_fn,
             kwargs=dict(priors=priors, warp_priors=warp_priors),
             threads=n_threads,
-            **kwargs
+            **kwargs,
         )
         rng = np.random.RandomState(
             self.random_state.randint(0, np.iinfo(np.int32).max)
@@ -543,7 +543,7 @@ class BayesGPR(GaussianProcessRegressor):
         priors=None,
         warp_priors=None,
         position=None,
-        **kwargs
+        **kwargs,
     ):
         """Fit the Gaussian process model to the given training data.
 
@@ -599,7 +599,7 @@ class BayesGPR(GaussianProcessRegressor):
             warp_priors=warp_priors,
             position=position,
             add=False,
-            **kwargs
+            **kwargs,
         )
 
     def predict(

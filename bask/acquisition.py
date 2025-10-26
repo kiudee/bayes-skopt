@@ -52,7 +52,7 @@ def evaluate_acquisitions(
     n_samples=10,
     progress=False,
     random_state=None,
-    **kwargs
+    **kwargs,
 ):
     """Run a set of acquisitions functions on a given set of points.
 

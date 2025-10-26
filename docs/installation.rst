@@ -44,7 +44,7 @@ Once you have a copy of the source, you can install it with:
 
 .. code-block:: console
 
-    $ poetry install
+    $ uv sync
 
 
 .. _Github repo: https://github.com/kiudee/bayes-skopt

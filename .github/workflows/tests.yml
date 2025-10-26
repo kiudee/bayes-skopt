@@ -31,10 +31,9 @@ jobs:
               with:
                   python-version: ${{ matrix.python-version }}
                   architecture: x64
-            - run: python -m pip install --upgrade pip setuptools wheel
-            - run: python -m pip install nox==2023.4.22
-            - run: python -m pip install nox-poetry==1.0.3
-            - run: python -m pip install poetry==1.5.1
+            - uses: astral-sh/setup-uv@v7
+              with:
+                  python-version: ${{ matrix.python-version }}
             - name: Compute pre-commit cache key
               if: matrix.session == 'pre-commit'
               id: pre-commit-cache
@@ -59,4 +58,4 @@ jobs:
                       "${{ steps.pre-commit-cache.outputs.result }}-"
             - name: Run Nox
               run: |
-                  nox --force-color --python=${{ matrix.python-version }}
+                  uv run --locked nox --force-color --python=${{ matrix.python-version }}

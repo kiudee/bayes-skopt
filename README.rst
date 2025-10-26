@@ -54,7 +54,7 @@ The latest development version of Bayes-skopt can be installed from Github as fo
 
 Another option is to clone the repository and install Bayes-skopt using::
 
-   poetry install
+   uv sync
 
 Credits
 -------

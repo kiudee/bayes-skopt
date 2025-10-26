@@ -64,12 +64,12 @@ Ready to contribute? Here's how to set up `bask` for local development.
 
     $ git clone git@github.com:your_name_here/bask.git
 
-3. Install your local copy into a virtualenv. Assuming you have `poetry`_ installed,
-   this is how you set up your fork for local development::
+3. Install your local copy into a virtualenv using `uv`_. This is how you set up your fork
+   for local development::
 
-       $ cd chess-tuning-tools/
-       $ poetry install
-       $ poetry run pre-commit install
+       $ cd bayes-skopt/
+       $ uv sync
+       $ uv run pre-commit install
 
 4. Create a branch for local development::
 
@@ -77,14 +77,14 @@ Ready to contribute? Here's how to set up `bask` for local development.
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass flake8 and the
-   tests, including testing other Python versions with tox::
+5. When you're done making changes, check that your changes pass the linters and the
+   tests, including running the Nox matrix locally if you can::
 
-       $ poetry run black bask tests
-       $ poetry run isort bask tests
-       $ poetry run flake8
-       $ poetry run pytest bask tests
-       $ poetry run tox
+       $ uv run black bask tests
+       $ uv run isort bask tests
+       $ uv run flake8
+       $ uv run pytest bask tests
+       $ uv run nox -s tests
 
 6. Commit your changes and push your branch to GitHub::
 
@@ -103,16 +103,15 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for Python 3.7 and 3.8. Check
-   https://travis-ci.org/kiudee/bayes-skopt/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+3. The pull request should work for Python 3.10 through 3.13. Check
+   the GitHub Actions test matrix and make sure that the tests pass for all supported Python versions.
 
 Tips
 ----
 
 To run a subset of tests::
 
-$ poetry run pytest tests.test_optimizer
+$ uv run pytest tests/test_optimizer.py
 
 
 Deploying
@@ -122,11 +121,11 @@ A reminder for the maintainers on how to deploy.
 Make sure all your changes are committed (including an entry in HISTORY.rst).
 Then run::
 
-    $ poetry version x.y.z
+    $ uv version x.y.z
     $ git commit -m "Bump version to x.y.z"
     $ git push
 
 Then create a new release on Github.
 
 
-.. _poetry: https://python-poetry.org/
+.. _uv: https://docs.astral.sh/uv/

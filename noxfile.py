@@ -1,4 +1,5 @@
 """Nox sessions."""
+
 from pathlib import Path
 from textwrap import dedent
 
@@ -81,7 +82,12 @@ def precommit(session):
     args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
     session.install("setuptools", "wheel")
     session.install(
-        "pre-commit", "black", "flake8", "doc8", "isort", "flake8-bugbear",
+        "pre-commit",
+        "black",
+        "flake8",
+        "doc8",
+        "isort",
+        "flake8-bugbear",
     )
     session.run("pre-commit", *args)
     if args and args[0] == "install":

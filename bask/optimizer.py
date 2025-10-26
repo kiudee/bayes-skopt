@@ -150,7 +150,7 @@ class Optimizer:
                 r2_sequence(n=n_initial_points, d=self.space.n_dims)
             )
         elif self.init_strategy == "sb":
-            self._init_rng = np.random.RandomState(self.rng.randint(2 ** 31))
+            self._init_rng = np.random.RandomState(self.rng.randint(2**31))
         self.n_points = n_points
 
         if gp_kwargs is None:
@@ -213,7 +213,7 @@ class Optimizer:
                     n=len(self.Xi) + 1,
                     d=self.space.transformed_n_dims,
                     existing_points=existing_points,
-                    random_state=self._init_rng.randint(2 ** 31),
+                    random_state=self._init_rng.randint(2**31),
                 )
                 return self.space.inverse_transform(
                     np.atleast_2d(points[len(self.Xi)])
@@ -440,7 +440,7 @@ class Optimizer:
         normalized_scores=True,
         random_state=None,
     ):
-        """ Compute the probability that the current expected optimum cannot be improved
+        """Compute the probability that the current expected optimum cannot be improved
         by more than ``threshold`` points.
 
         Parameters
@@ -518,7 +518,7 @@ class Optimizer:
         normalized_scores=True,
         random_state=None,
     ):
-        """ Estimate the expected optimality gap by repeatedly sampling functions
+        """Estimate the expected optimality gap by repeatedly sampling functions
         consistent with the data.
 
         Parameters
@@ -557,7 +557,7 @@ class Optimizer:
             randomly sampled, consistent optima.
         """
         random_state = check_random_state(random_state)
-        seed = random_state.randint(0, 2 ** 32 - 1, dtype=np.int64)
+        seed = random_state.randint(0, 2**32 - 1, dtype=np.int64)
 
         def func(threshold):
             prob = self.probability_of_optimality(
@@ -569,7 +569,7 @@ class Optimizer:
                 normalized_scores=normalized_scores,
                 random_state=seed,
             )
-            return (prob - 1.0) ** 2 + threshold ** 2 * 1e-3
+            return (prob - 1.0) ** 2 + threshold**2 * 1e-3
 
         max_observed_gap = np.max(self.yi) - np.min(self.yi)
         for _ in range(max_tries):

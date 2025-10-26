@@ -93,7 +93,9 @@ def evaluate_acquisitions(
     n_acqs = len(acquisition_functions)
     acq_output = np.zeros((n_acqs, n_cand_points))
     random_state = check_random_state(random_state)
-    trace_sample_i = random_state.choice(len(gpr.chain_), replace=False, size=n_samples)
+    trace_sample_i = random_state.choice(
+        len(gpr.chain_), replace=False, size=n_samples
+    )
     theta_backup = np.copy(gpr.theta)
     if gpr.warp_inputs:
         alphas_backup = np.copy(gpr.warp_alphas_)
@@ -129,7 +131,9 @@ def evaluate_acquisitions(
                 elif isinstance(acq, SampleAcquisition):
                     if not sample_generated:
                         sample_generated = True
-                        sample = gpr.sample_y(X, random_state=random_state).flatten()
+                        sample = gpr.sample_y(
+                            X, random_state=random_state
+                        ).flatten()
                     tmp_out = acq(sample, **kwargs)
                 else:
                     continue
@@ -247,7 +251,8 @@ class MaxValueSearch(UncertaintyAcquisition):
         beta = (q1 - q2) / (np.log(np.log(4.0 / 3.0)) - np.log(np.log(4.0)))
         alpha = med + beta * np.log(np.log(2.0))
         max_values = (
-            -np.log(-np.log(np.random.rand(n_min_samples).astype(np.float32))) * beta
+            -np.log(-np.log(np.random.rand(n_min_samples).astype(np.float32)))
+            * beta
             + alpha
         )
 
@@ -308,7 +313,9 @@ class PVRS(FullGPAcquisition):
     Bayesian optimization at neural information processing systems (NIPSW). 2017.
     """
 
-    def __call__(self, X, gp, *args, n_thompson=10, random_state=None, **kwargs):
+    def __call__(
+        self, X, gp, *args, n_thompson=10, random_state=None, **kwargs
+    ):
         n = len(X)
         thompson_sample = gp.sample_y(
             X, sample_mean=True, n_samples=n_thompson, random_state=random_state

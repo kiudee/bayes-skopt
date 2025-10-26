@@ -15,8 +15,8 @@
 - Build packages with `make dist`; generated artifacts appear in `dist/`.
 
 ## Style & Formatting
-- Use `black` and `isort` before committing; the shared config keeps formatting deterministic.
-- Follow `flake8` rules (80-character lines, Google import order, select=B,C,E,F,W,T4,B9). Resolve warnings instead of adding ignores.
+- Use `ruff format` before committing; the shared config keeps formatting deterministic.
+- Follow the Ruff lint configuration (80-character lines, Google import order, select=B,C90,E,F,W) and resolve warnings instead of adding ignores.
 - Prefer `snake_case` for modules and functions, `PascalCase` for classes, and `UPPER_SNAKE_CASE` for constants. Keep docstrings concise and NumPy-style when detailing parameters.
 
 ## Testing Expectations

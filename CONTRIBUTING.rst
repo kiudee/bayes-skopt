@@ -77,12 +77,11 @@ Ready to contribute? Here's how to set up `bask` for local development.
 
    Now you can make your changes locally.
 
-5. When you're done making changes, check that your changes pass the linters and the
-   tests, including running the Nox matrix locally if you can::
+5. When you're done making changes, check that your changes pass the formatter,
+   linters, and tests, including running the Nox matrix locally if you can::
 
-       $ uv run black bask tests
-       $ uv run isort bask tests
-       $ uv run flake8
+       $ uv run ruff format bask tests
+       $ uv run ruff check bask tests
        $ uv run pytest bask tests
        $ uv run nox -s tests
 

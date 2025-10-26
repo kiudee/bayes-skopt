@@ -79,7 +79,10 @@ def _recursive_priors(kernel, prior_list):
     else:
         name = type(kernel).__name__
         if name in ["ConstantKernel", "WhiteKernel"]:
-            if name == "ConstantKernel" and kernel.constant_value_bounds == "fixed":
+            if (
+                name == "ConstantKernel"
+                and kernel.constant_value_bounds == "fixed"
+            ):
                 return
             if name == "WhiteKernel" and kernel.noise_level_bounds == "fixed":
                 return
@@ -101,7 +104,9 @@ def _recursive_priors(kernel, prior_list):
             # For common optimization problems, we expect the lengthscales to
             # lie in the range [0.1, 0.6]. The round-flat prior allows values
             # outside the range, if supported by enough datapoints.
-            if isinstance(kernel.length_scale, (collections.abc.Sequence, np.ndarray)):
+            if isinstance(
+                kernel.length_scale, (collections.abc.Sequence, np.ndarray)
+            ):
                 n_priors = len(kernel.length_scale)
             else:
                 n_priors = 1
@@ -139,7 +144,9 @@ def construct_default_kernel(dimensions):
     kernel = ConstantKernel(
         constant_value=1.0, constant_value_bounds=(0.1, 2.0)
     ) * Matern(
-        length_scale=[0.3] * n_parameters, length_scale_bounds=(0.2, 0.5), nu=2.5
+        length_scale=[0.3] * n_parameters,
+        length_scale_bounds=(0.2, 0.5),
+        nu=2.5,
     )
     return kernel
 

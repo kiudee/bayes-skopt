@@ -139,21 +139,21 @@ class BayesSearchCV(BayesSearchCVSK):
     >>> from sklearn.model_selection import train_test_split
     >>>
     >>> X, y = load_iris(True)
-    >>> X_train, X_test, y_train, y_test = train_test_split(X, y,
-    ...                                                     train_size=0.75,
-    ...                                                     random_state=0)
+    >>> X_train, X_test, y_train, y_test = train_test_split(
+    ...     X, y, train_size=0.75, random_state=0
+    ... )
     >>>
     >>> # log-uniform: understand as search over p = exp(x) by varying x
     >>> opt = BayesSearchCV(
     ...     SVC(),
     ...     {
-    ...         'C': Real(1e-6, 1e+6, prior='log-uniform'),
-    ...         'gamma': Real(1e-6, 1e+1, prior='log-uniform'),
-    ...         'degree': Integer(1,8),
-    ...         'kernel': Categorical(['linear', 'poly', 'rbf']),
+    ...         "C": Real(1e-6, 1e6, prior="log-uniform"),
+    ...         "gamma": Real(1e-6, 1e1, prior="log-uniform"),
+    ...         "degree": Integer(1, 8),
+    ...         "kernel": Categorical(["linear", "poly", "rbf"]),
     ...     },
     ...     n_iter=32,
-    ...     random_state=0
+    ...     random_state=0,
     ... )
     >>>
     >>> # executes bayesian optimization
@@ -311,12 +311,19 @@ class BayesSearchCV(BayesSearchCVSK):
         for i in range(len(optimizer.space.dimensions)):
             if optimizer.space.dimensions[i].name is not None:
                 continue
-            optimizer.space.dimensions[i].name = list(sorted(params_space.keys()))[i]
+            optimizer.space.dimensions[i].name = list(
+                sorted(params_space.keys())
+            )[i]
 
         return optimizer
 
     def _step(
-        self, search_space, optimizer, score_name, evaluate_candidates, n_points=1
+        self,
+        search_space,
+        optimizer,
+        score_name,
+        evaluate_candidates,
+        n_points=1,
     ):
         """Generate n_jobs parameters and evaluate them in parallel."""
 

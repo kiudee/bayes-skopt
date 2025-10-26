@@ -36,7 +36,7 @@ def test_guess_priors():
         -0.02116327824572739,
         -0.02116327824572739,
     ]
-    for p, v in zip(priors, expected):
+    for p, v in zip(priors, expected, strict=True):
         assert_almost_equal(p(-0.9), v)
 
 

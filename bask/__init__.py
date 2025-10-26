@@ -1,4 +1,5 @@
 """Top-level package for Bayes-skopt."""
+
 try:
     from importlib.metadata import version
 except ImportError:

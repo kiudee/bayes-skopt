@@ -1,4 +1,5 @@
 """Nox sessions."""
+
 from pathlib import Path
 from textwrap import dedent
 
@@ -7,7 +8,7 @@ from nox_poetry import session as noxsession
 
 locations = "bask", "noxfile.py"
 nox.options.sessions = ("pre-commit", "tests")
-python_versions = ["3.8", "3.9"]
+python_versions = ["3.10", "3.11", "3.12", "3.13"]
 
 
 def activate_virtualenv_in_precommit_hooks(session):
@@ -62,12 +63,13 @@ def activate_virtualenv_in_precommit_hooks(session):
 @noxsession(python=python_versions)
 def tests(session):
     """Run the test suite."""
+    session.install("setuptools", "wheel")
     session.install(".[data]")
     session.install("pytest", "nox", "nox-poetry")
     session.run("pytest", *session.posargs)
 
 
-@noxsession(python="3.9")
+@noxsession(python="3.13")
 def black(session):
     """Run black code formatter."""
     args = session.posargs or locations
@@ -75,11 +77,17 @@ def black(session):
     session.run("black", *args)
 
 
-@noxsession(name="pre-commit", python="3.9")
+@noxsession(name="pre-commit", python="3.13")
 def precommit(session):
     args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
+    session.install("setuptools", "wheel")
     session.install(
-        "pre-commit", "black", "flake8", "doc8", "isort", "flake8-bugbear",
+        "pre-commit",
+        "black",
+        "flake8",
+        "doc8",
+        "isort",
+        "flake8-bugbear",
     )
     session.run("pre-commit", *args)
     if args and args[0] == "install":

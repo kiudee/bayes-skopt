@@ -9,7 +9,7 @@ from bask.bayesgpr import BayesGPR
 @pytest.fixture(params=[False, True])
 def minimal_gp(request):
     kernel = ConstantKernel(
-        constant_value=1 ** 2, constant_value_bounds=(0.01 ** 2, 1 ** 2)
+        constant_value=1**2, constant_value_bounds=(0.01**2, 1**2)
     ) * RBF(length_scale=1.0, length_scale_bounds=(0.5, 1.5))
     gp = BayesGPR(
         random_state=1, normalize_y=False, kernel=kernel, warp_inputs=request.param

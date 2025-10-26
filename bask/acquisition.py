@@ -237,7 +237,12 @@ class MaxValueSearch(UncertaintyAcquisition):
         right = np.max(mean + 5 * std)
         # Binary search for 3 percentiles
         q1, med, q2 = [
-            brentq(lambda x: probf(x) - val, left, right,) for val in [0.25, 0.5, 0.75]
+            brentq(
+                lambda x, val=val: probf(x) - val,
+                left,
+                right,
+            )
+            for val in [0.25, 0.5, 0.75]
         ]
         beta = (q1 - q2) / (np.log(np.log(4.0 / 3.0)) - np.log(np.log(4.0)))
         alpha = med + beta * np.log(np.log(2.0))

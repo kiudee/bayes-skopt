@@ -46,7 +46,9 @@ def make_roundflat(
         )
 
     value = quad(
-        lambda x: np.exp(roundflat(x)), integration_bounds[0], integration_bounds[1]
+        lambda x: np.exp(roundflat(x)),
+        integration_bounds[0],
+        integration_bounds[1],
     )[0]
 
     def prior(x):

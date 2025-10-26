@@ -220,7 +220,9 @@ class Optimizer:
                 )[0]
             return self.space.rvs()[0]
         if not self.gp.kernel_:
-            raise RuntimeError("Initialization is finished, but no model has been fit.")
+            raise RuntimeError(
+                "Initialization is finished, but no model has been fit."
+            )
         return self._next_x
 
     def tell(
@@ -355,7 +357,9 @@ class Optimizer:
                 X = self.gp.unwarp(X_warped)
             else:
                 X = self.space.transform(
-                    self.space.rvs(n_samples=self.n_points, random_state=self.rng)
+                    self.space.rvs(
+                        n_samples=self.n_points, random_state=self.rng
+                    )
                 )
             acq_values = evaluate_acquisitions(
                 X=X,
@@ -371,10 +375,18 @@ class Optimizer:
                 X[np.argmax(acq_values)].reshape((1, -1))
             )[0]
 
-        return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
+        return create_result(
+            self.Xi, self.yi, self.space, self.rng, models=[self.gp]
+        )
 
     def run(
-        self, func, n_iter=1, replace=False, n_samples=5, gp_samples=100, gp_burnin=10
+        self,
+        func,
+        n_iter=1,
+        replace=False,
+        n_samples=5,
+        gp_samples=100,
+        gp_burnin=10,
     ):
         """Execute the ask/tell-loop on a given objective function.
 
@@ -428,7 +440,9 @@ class Optimizer:
             )
             replace = False
 
-        return create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
+        return create_result(
+            self.Xi, self.yi, self.space, self.rng, models=[self.gp]
+        )
 
     def probability_of_optimality(
         self,
@@ -473,10 +487,14 @@ class Optimizer:
         probabilities : float or list-of-floats
             Probabilities of the current optimum to be optimal wrt the given thresholds.
         """
-        result = create_result(self.Xi, self.yi, self.space, self.rng, models=[self.gp])
+        result = create_result(
+            self.Xi, self.yi, self.space, self.rng, models=[self.gp]
+        )
         X_orig = [
             expected_minimum(
-                result, random_state=random_state, n_random_starts=n_random_starts
+                result,
+                random_state=random_state,
+                n_random_starts=n_random_starts,
             )[0]
         ]
 
@@ -581,7 +599,9 @@ class Optimizer:
             except ValueError:
                 pass
         else:
-            raise ValueError("Determining the upper threshold was not possible.")
+            raise ValueError(
+                "Determining the upper threshold was not possible."
+            )
 
         thresholds = list(np.linspace(0, upper_threshold, num=n_probabilities))
         probabilities = self.probability_of_optimality(
@@ -653,12 +673,17 @@ class Optimizer:
         X = self.space.rvs(n_samples=space_samples, random_state=random_state)
         X = self.space.transform(X)
         optimum_samples = self.gp.sample_y(
-            X, sample_mean=only_mean, n_samples=opt_samples, random_state=random_state
+            X,
+            sample_mean=only_mean,
+            n_samples=opt_samples,
+            random_state=random_state,
         )
         X_opt = X[np.argmin(optimum_samples, axis=0)]
 
         intervals = []
         for i, col in enumerate(X_opt.T):
             raw_interval = hdi(col, hdi_prob=hdi_prob, multimodal=multimodal)
-            intervals.append(self.space.dimensions[i].inverse_transform(raw_interval))
+            intervals.append(
+                self.space.dimensions[i].inverse_transform(raw_interval)
+            )
         return intervals

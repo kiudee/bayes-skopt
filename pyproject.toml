@@ -47,13 +47,9 @@ Documentation = "https://bayes-skopt.readthedocs.io"
 
 [dependency-groups]
 dev = [
-    "black>=24.0.0",
     "coverage>=5.2.1",
     "doc8>=0.11.2",
-    "flake8>=3.8.3",
-    "flake8-bugbear>=20.1.4",
     "ipython>=7.17.0",
-    "isort>=5.3.0",
     "nbsphinx>=0.7.1",
     "nbsphinx-link>=1.3.0",
     "nox>=2024.4.15",
@@ -63,6 +59,7 @@ dev = [
     "pre-commit>=2.6.0",
     "pytest>=6.0.1",
     "pytest-runner>=5.2",
+    "ruff>=0.14.2",
     "Sphinx>=3.1.2",
     "twine>=3.2.0",
     "watchdog>=0.10.3",
@@ -75,6 +72,23 @@ build-backend = "setuptools.build_meta"
 
 [tool.uv]
 default-groups = ["dev"]
+
+[tool.ruff]
+line-length = 80
+target-version = "py310"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = ["B", "C90", "E", "F", "W"]
+ignore = ["E203", "E501", "F403", "F405"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["bask"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
 
 [tool.setuptools.packages.find]
 include = ["bask", "bask.*"]

@@ -7,7 +7,7 @@ import nox
 from nox import Session
 from nox_uv import session
 
-locations = "bask", "noxfile.py"
+locations = ("bask", "tests", "noxfile.py")
 nox.options.sessions = ("pre-commit", "tests")
 python_versions = ["3.10", "3.11", "3.12", "3.13"]
 nox.options.default_venv_backend = "uv"
@@ -39,7 +39,9 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
         text = hook.read_text()
         bindir = repr(session.bin)[1:-1]  # strip quotes
         if not (
-            Path("A") == Path("a") and bindir.lower() in text.lower() or bindir in text
+            Path("A") == Path("a")
+            and bindir.lower() in text.lower()
+            or bindir in text
         ):
             continue
 
@@ -69,10 +71,17 @@ def tests(session: Session) -> None:
 
 
 @session(python="3.13", uv_groups=["dev"])
-def black(session: Session) -> None:
-    """Run black code formatter."""
+def format(session: Session) -> None:
+    """Run Ruff formatter."""
     args = session.posargs or locations
-    session.run("black", *args)
+    session.run("ruff", "format", *args)
+
+
+@session(python="3.13", uv_groups=["dev"])
+def lint(session: Session) -> None:
+    """Run Ruff lint checks."""
+    args = session.posargs or locations
+    session.run("ruff", "check", *args)
 
 
 @session(name="pre-commit", python="3.13", uv_groups=["dev"])

@@ -47,8 +47,9 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-lint: ## check style with flake8
-	flake8 bask tests
+lint: ## check style with Ruff
+	uv run ruff format --check bask tests
+	uv run ruff check bask tests
 
 test: ## run tests quickly with the default Python
 	pytest

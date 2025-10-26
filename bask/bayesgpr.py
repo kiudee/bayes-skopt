@@ -241,7 +241,9 @@ class BayesGPR(GaussianProcessRegressor):
             self._X_train_warped_ = np.copy(self._X_train_orig_)
             if hasattr(self, "warpers_"):
                 for col, warper in enumerate(self.warpers_):
-                    self._X_train_warped_[:, col] = warper(self._X_train_orig_[:, col])
+                    self._X_train_warped_[:, col] = warper(
+                        self._X_train_orig_[:, col]
+                    )
             # If no warpers exist yet, we begin with an unwarped input space
 
     def warp(self, X):
@@ -288,7 +290,9 @@ class BayesGPR(GaussianProcessRegressor):
             if hasattr(self, "warpers_") and hasattr(self, "_X_train_orig_"):
                 self._X_train_warped_ = np.empty_like(self._X_train_orig_)
                 for col, warper in enumerate(self.warpers_):
-                    self._X_train_warped_[:, col] = warper(self._X_train_orig_[:, col])
+                    self._X_train_warped_[:, col] = warper(
+                        self._X_train_orig_[:, col]
+                    )
 
     def create_warpers(self, alphas, betas):
         """Create Beta CDFs and inverse CDFs for input (un)warping.
@@ -321,8 +325,12 @@ class BayesGPR(GaussianProcessRegressor):
         current_theta = self.theta
         try:
             # Now we set the noise to 0, but do NOT recalculate the alphas!:
-            white_present, white_param = _param_for_white_kernel_in_Sum(self.kernel_)
-            self.kernel_.set_params(**{white_param: WhiteKernel(noise_level=0.0)})
+            white_present, white_param = _param_for_white_kernel_in_Sum(
+                self.kernel_
+            )
+            self.kernel_.set_params(
+                **{white_param: WhiteKernel(noise_level=0.0)}
+            )
             yield self
         finally:
             self.kernel_.theta = current_theta
@@ -333,7 +341,9 @@ class BayesGPR(GaussianProcessRegressor):
         if noise_vector is not None:
             if not np.iterable(self.alpha):
                 alpha = np.ones(n_instances) * self.alpha
-            elif not np.iterable(self._alpha):  # we already changed self.alpha before
+            elif not np.iterable(
+                self._alpha
+            ):  # we already changed self.alpha before
                 alpha = np.ones(n_instances) * self._alpha
             alpha[: len(noise_vector)] += noise_vector
             self.alpha = alpha
@@ -468,7 +478,9 @@ class BayesGPR(GaussianProcessRegressor):
             y = (y - self.y_train_mean_) / self.y_train_std_
 
             if noise_vector is not None:
-                noise_vector = np.array(noise_vector) / np.power(self.y_train_std_, 2)
+                noise_vector = np.array(noise_vector) / np.power(
+                    self.y_train_std_, 2
+                )
 
             self.X_train_ = np.copy(X) if self.copy_X_train else X
             self.y_train_ = np.copy(y) if self.copy_X_train else y
@@ -492,7 +504,8 @@ class BayesGPR(GaussianProcessRegressor):
             if self.warp_inputs:
                 theta = np.concatenate([theta, np.zeros(added_dims)])
             pos = [
-                theta + 1e-2 * self.random_state.randn(n_dim) for _ in range(n_walkers)
+                theta + 1e-2 * self.random_state.randn(n_dim)
+                for _ in range(n_walkers)
             ]
         self._sampler = mc.EnsembleSampler(
             nwalkers=n_walkers,
@@ -506,11 +519,15 @@ class BayesGPR(GaussianProcessRegressor):
             self.random_state.randint(0, np.iinfo(np.int32).max)
         )
         self._sampler.random_state = rng.get_state()
-        pos, prob, state = self._sampler.run_mcmc(pos, n_samples, progress=progress)
+        pos, prob, state = self._sampler.run_mcmc(
+            pos, n_samples, progress=progress
+        )
         # if backup_file is not None:
         #     with open(backup_file, "wb") as f:
         #         np.save(f, pos)
-        chain = self._sampler.get_chain(flat=True, discard=n_burnin, thin=n_thin)
+        chain = self._sampler.get_chain(
+            flat=True, discard=n_burnin, thin=n_thin
+        )
         if add and self.chain_ is not None:
             self.chain_ = np.concatenate([self.chain_, chain])
         else:
@@ -617,7 +634,9 @@ class BayesGPR(GaussianProcessRegressor):
             X, return_std, return_cov, return_mean_grad, return_std_grad
         )
 
-    def sample_y(self, X, sample_mean=False, noise=False, n_samples=1, random_state=0):
+    def sample_y(
+        self, X, sample_mean=False, noise=False, n_samples=1, random_state=0
+    ):
         """Sample function realizations of the Gaussian process.
 
         Parameters
@@ -653,7 +672,9 @@ class BayesGPR(GaussianProcessRegressor):
             else:
                 cm = self.noise_set_to_zero()
             with cm:
-                samples = super().sample_y(X, n_samples=n_samples, random_state=rng)
+                samples = super().sample_y(
+                    X, n_samples=n_samples, random_state=rng
+                )
             return samples
         ind = rng.choice(len(self.chain_), size=n_samples, replace=True)
         if self.warp_inputs:
@@ -670,7 +691,10 @@ class BayesGPR(GaussianProcessRegressor):
                 validate_zeroone(X)
                 theta = self.chain_[j][:n_dims]
                 warp_params = self.chain_[j][n_dims:]
-                alphas, betas = warp_params[: X.shape[1]], warp_params[X.shape[1] :]
+                alphas, betas = (
+                    warp_params[: X.shape[1]],
+                    warp_params[X.shape[1] :],
+                )
                 self.create_warpers(alphas, betas)
                 self.rewarp()
             else:
